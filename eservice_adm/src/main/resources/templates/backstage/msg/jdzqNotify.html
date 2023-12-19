@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<style type="text/css">
+	.tab {
+		font-size: 15px;
+		background-color: #fff;
+		color: #009b30;
+		text-align: center;
+		display: inline-block;
+		width: 100%;
+		margin-left: 0px;
+		padding: 0;
+	}
+	.tab .active {
+		background-color: #009b30;
+		color: #fff;
+		z-index: 5;
+	}
+	.tab li {
+		padding: 12px 12px 8px 20px;
+		position: relative;
+		display: inline-block;
+		border-bottom: 1px solid #eee;
+		z-index: 0;
+		border: 1px solid #eee;
+	}
+
+</style>
+<link rel="stylesheet" th:href="@{/plugin/summernote-editor/summernote.css}"/>
+<head>
+    <th:block th:replace="fragments/head"/>
+</head>
+<body class="no-skin">
+<th:block th:replace="fragments/navbar"/>
+<div class="main-container my-save-state" id="main-container">
+    <script type="text/javascript">
+				try{my.settings.loadState('main-container')}catch(e){}
+
+    </script>
+    <div th:replace="fragments/sidebar :: sidebar (funId='jdzqNotifyManagement')"></div>
+    <div class="main-content">
+        <div class="main-content-inner">
+            <div class="breadcrumbs my-save-state" id="breadcrumbs">
+                <ul class="breadcrumb">
+                    <li>
+                        <i class="fa fa-signal" aria-hidden="true"></i>
+                        通信管理
+                        <i class="my-icon fa fa-angle-double-right"></i>
+                        經代專區通知管理
+                    </li>
+                </ul>
+            </div>
+            <div class="page-content">
+                <div class="row">
+                    <div class="col-xs-12 member">
+                        <form class="form-horizontal" role="form" id="form1">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label text-right no-padding-right"><span style="color: red;">*</span>通知顯示時間設定：</label>
+                                <div class="col-sm-7">
+                                    <input class="form-control" type="text" id="notifyTime" name="notifyTime"
+                                           data-date-format="YYYY-MM-DD HH:mm:ss"/>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label text-right no-padding-right">通知接收人設定</label>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label text-right no-padding-right">通路：</label>
+                                <div class="col-sm-7">
+                                    <select class="chosen-select form-control" id="passageWaySelect" data-placeholder="請選擇通路...">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label text-right no-padding-right"><span style="color: red;">*</span>通知接收人類型：</label>
+                                <div class="col-sm-7">
+                                    <div class="radio" style="float: left;padding-right: 20px;">
+                                        <label>
+                                            <div class="radio-btn"><i><input type="radio" name="notifyRadio"
+                                                                             value="passageWay"></i></div>
+                                            指定通路
+                                        </label>
+                                    </div>
+                                    <div class="radio" style="float: left;padding-right: 20px;">
+                                        <label>
+                                            <div class="radio-btn"><i><input type="radio" name="notifyRadio"
+                                                                             value="member"></i></div>
+                                            指定登錄字號
+                                        </label>
+                                    </div>
+                                    <div class="radio" style="float: left;padding-right: 20px;">
+                                        <label>
+                                            <div class="radio-btn"><i><input type="radio" name="notifyRadio"
+                                                                             value="department"></i></div>
+                                            指定分支機構
+                                        </label>
+                                    </div>
+                                    <div class="radio" style="float: left;padding-right: 20px;">
+                                        <label>
+                                            <div class="radio-btn"><i><input type="radio" name="notifyRadio"
+                                                                             value="role"></i></div>
+                                            指定角色
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label text-right no-padding-right">通知內容設定</label>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label text-right no-padding-right"><span style="color: red;">*</span>主旨：</label>
+                                <div class="col-sm-7">
+                                    <input class="form-control" id="notifyTitle" type="text" maxlength="50"/>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label text-right no-padding-right"><span style="color: red;">*</span>內文：</label>
+                                <div class="col-sm-7">
+                                    <div id="notifyMsgContent"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <div id="show-detail-results" hidden="true">
+                                        <div id="queryContent">
+                                            <div style="margin:0 auto;">
+                                                <table id="qryGrid"></table>
+                                                <div id="qryPager"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-6" style="text-align: right;">
+                                    <button type="button" class="btn btn-success sendBtn">
+                                        <i class="my-icon fa fa-floppy-o"></i>
+                                        確定新增
+                                    </button>
+                                </div>
+                                <div class="col-sm-6" style="text-align: left;">
+                                    <button type="button" class="btn" onclick="resetTree()">
+                                        <i class="my-icon fa fa-remove"></i>
+                                        重新輸入
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    </div>
+                    <div class="hr hr-18 dotted hr-double"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="fragments/footer"></div>
+<a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">
+    <i class="my-icon fa fa-angle-double-up icon-only bigger-110"></i>
+</a>
+</div>
+
+<th:block th:replace="fragments/script"/>
+<script th:src="@{/js/bootstrap-datetimepicker.min.js}"></script>
+<script th:src="@{/plugin/summernote-editor/summernote.min.js}"></script>
+<script th:src="@{/plugin/summernote-editor/lang/summernote-zh-TW.js}"></script>
+<script th:inline="javascript">
+/*<![CDATA[*/
+		var qryGrid
+		var selectUserId;
+		var users, deps, roles
+		$(function() {
+		    eserviceAdmOption.chosenCommon("#passageWaySelect", /*[[@{/jdDeptMgnt/getPassageWay}]]*/, 'VALUE');
+			$('input[name=notifyTime]').datetimepicker(
+			{
+			    minDate: new Date()
+			});
+			// 顯示查詢結果區域
+			$('#show-detail-results').show();
+            $("input[name='notifyRadio']").click(function(){
+                if ($("#passageWaySelect option:selected").val() == '') {
+                      alertMsg('請選擇通路！');
+                      return false;
+                }
+                if ($(this).val() == 'member') {
+                    showMember()
+                } else if ($(this).val() == 'department') {
+                    showDept()
+                } else if ($(this).val() == 'role') {
+                    showRole()
+                } else if ($(this).val() == 'passageWay')(
+                    showPassageWay()
+                )
+            })
+
+            $("#passageWaySelect").change(function(){
+                if ($("input[name='notifyRadio']:checked").val() == 'member') {
+                    showMember()
+                } else if ($("input[name='notifyRadio']:checked").val() == 'department') {
+                    showDept()
+                } else if ($("input[name='notifyRadio']:checked").val() == 'role')(
+                    showRole()
+                )
+            })
+
+			$('.sendBtn').click(function(){
+
+                if ($("#notifyTime").val() == null || $("#notifyTime").val() == '') {
+                    alertMsg('未選擇發送時間');
+                    return false;
+                }
+
+                if ($("#notifyTitle").val() == null || $("#notifyTitle").val() == '') {
+                    alertMsg('未填寫主旨');
+                    return false;
+                }
+
+                if ($("#notifyMsgContent").summernote('isEmpty')) {
+                    alertMsg('未填寫發送内容');
+                    return false;
+                }
+
+                notifyTarget = ''
+                checked = $("input[name='notifyRadio']:checked")
+                deps = new Array()
+                users = new Array()
+                 roles = new Array()
+                if ($(checked).val() == 'passageWay') {
+                    notifyTarget = $('#passageWaySelect option:selected').text()
+                } else if ($(checked).val() == 'member') {
+                    $('.memberCheckBox:checked').each(function(key,value){
+                            users[key] = $(value).val()
+                            targetTd = $(this).parent()
+                            notifyTarget += $(targetTd).next().text() + ';' + $(targetTd).next().next().text() + ';' + $(targetTd).next().next().next().text() + ','
+                        }
+                    )
+                    if (users.length <= 0) {
+                        alertMsg('未選擇發送對象');
+					    return false;
+                    }
+                    notifyTarget = notifyTarget.substring(0, notifyTarget.length -1)
+                } else if ($(checked).val() == 'role') {
+                    $('.roleCheckBox:checked').each(function(key,value){
+                            roles[key] = $(value).val()
+                            targetTd = $(this).parent()
+                            notifyTarget += $(targetTd).next().text() + ';' + $(targetTd).next().next().text() + ','
+                        }
+                    )
+                    if (roles.length <= 0) {
+                        alertMsg('未選擇發送對象');
+					    return false;
+                    }
+                    notifyTarget = notifyTarget.substring(0, notifyTarget.length -1)
+                } else if ($(checked).val() == 'department') {
+                    $('.depCheckBox:checked').each(function(key,value){
+                            deps[key] = $(value).val()
+                            targetTd = $(this).parent()
+                            notifyTarget += $(targetTd).next().text() + ';' + $(targetTd).next().next().text() + ','
+                        }
+                    )
+                    if (deps.length <= 0) {
+                        alertMsg('未選擇發送對象');
+					    return false;
+                    }
+                    notifyTarget = notifyTarget.substring(0, notifyTarget.length -1)
+                }
+
+                data = {
+                    users: users,
+                    deps: deps,
+                    roles: roles,
+                    msg: $("#notifyMsgContent").summernote('code'),
+                    title: $("#notifyTitle").val(),
+                    notifyTime: $("#notifyTime").val(),
+                    notifyTarget: notifyTarget,
+                    passageWay: $('#passageWaySelect option:selected').val()
+                }
+                $.ajax({
+                    type : 'POST',
+                    contentType : 'application/json',
+                    url : /*[[@{/addJdzqMsgSchedule}]]*/,
+                    data : JSON.stringify(data),
+                    success : function(response) {
+                        if (response.result == 'SUCCESS') {
+                           alertMsg('新增成功');
+                           setTimeout(function() { window.location.reload(); }, 1000)
+                           return false;
+                        }
+                    },
+                    error : function() {
+                        alertMsg('error!')
+                    }
+                });
+
+			})
+
+			$("#notifyMsgContent").summernote({
+			  minHeight: 100,             // set minimum height of editor
+			  maxHeight: 300,             // set maximum height of editor
+			  placeholder: '請輸入通知内容及格式...',
+			  lang: 'zh-TW',
+			  toolbar: [
+					// [groupName, [list of button]]
+					['style', ['bold', 'italic', 'underline', 'clear']],
+					['font', ['fontname', 'fontsize','color']],
+					['para', ['ul', 'ol']],
+					['Insert', ['link', 'hr']],
+					['height', ['height']],
+					['misc', ['codeview']]
+				],
+				fontNames: ['Arial', 'Consolas', 'Courier New', '新細明體', '微軟正黑體', '標楷體']
+			});
+		});
+
+		function showMember() {
+		    $("#queryContent").html('<div style="margin:0 auto; width:50%;"><table id="qryGrid"></table><div id="qryPager"></div></div>')
+			qryGrid = new jqGridUtil();
+			qryGrid.id = '#qryGrid';
+			qryGrid.url = /*[[@{/jdUserMgnt/getNotifyUsers}]]*/;
+			qryGrid.caption = '員工查詢結果';
+			qryGrid.colNames = ['', '通路', '登錄字號', '姓名'];
+			qryGrid.colModel = [
+				{align: 'center', formatter: function(cellvalue, options, row) {
+					var actionHtml = '';
+					actionHtml += '<input class="memberCheckBox" type="checkbox" value="' + row.ID + '"/>';
+					return actionHtml;
+				}},
+				{formatter: function(cellvalue, options, row) {
+					return breakLine(row.PASSAGE_WAY);
+				}},
+				{name: 'SERIAL_NUM', index: 'SERIAL_NUM'},
+				{formatter: function(cellvalue, options, row) {
+					return emptyIfNull(row.USER_NAME);
+				}}
+			];
+			qryGrid.setPostData('passageWay', $('#passageWaySelect option:selected').val());
+			qryGrid.create();
+		}
+
+		function showDept() {
+		    $("#queryContent").html('<div style="margin:0 auto; width:50%;"><table id="qryGrid"></table><div id="qryPager"></div></div>')
+			qryGrid = new jqGridUtil();
+			qryGrid.id = '#qryGrid';
+			qryGrid.url = /*[[@{/jdDeptMgnt/getDepartment}]]*/;
+			qryGrid.caption = '分行查詢結果';
+			qryGrid.colNames = ['', '通路', '分支機構'];
+			qryGrid.colModel = [
+				{align: 'center', formatter: function(cellvalue, options, row) {
+					var actionHtml = '';
+					actionHtml += '<input class="depCheckBox" type="checkbox" value="' + row.DEP_ID + '"/>';
+					return actionHtml;
+				}},
+				{formatter: function(cellvalue, options, row) {
+					return breakLine(row.PASSAGE_WAY);
+				}},
+				{formatter: function(cellvalue, options, row) {
+					return breakLine(row.DEP_NAME);
+				}}
+			];
+			qryGrid.setPostData('passageWay', $('#passageWaySelect option:selected').val());
+			qryGrid.create();
+		}
+
+		function showRole() {
+		    $("#queryContent").html('<div style="margin:0 auto; width:50%;"><table id="qryGrid"></table><div id="qryPager"></div></div>')
+			qryGrid = new jqGridUtil();
+			qryGrid.id = '#qryGrid';
+			qryGrid.url = /*[[@{/jdRole/getNotifyRoles}]]*/;
+			qryGrid.caption = '角色查詢結果';
+			qryGrid.colNames = ['', '通路', '角色'];
+			qryGrid.colModel = [
+				{align: 'center', formatter: function(cellvalue, options, row) {
+					var actionHtml = '';
+					actionHtml += '<input class="roleCheckBox" type="checkbox" value="' + row.ROLE_ID + '"/>';
+					return actionHtml;
+				}},
+				{formatter: function(cellvalue, options, row) {
+					return breakLine(row.PASSAGE_WAY);
+				}},
+				{formatter: function(cellvalue, options, row) {
+					return breakLine(row.ROLE_NAME);
+				}},
+			];
+			qryGrid.setPostData('passageWay', $('#passageWaySelect option:selected').val());
+			qryGrid.create();
+		}
+
+		function showPassageWay() {
+		    $("#queryContent").html('<div style="margin:0 auto; width:50%;"><table id="qryGrid"></table><div id="qryPager"></div></div>')
+		}
+
+		function breakLine(data) {
+			var result = data;
+			if (typeof data === 'string') {
+				result = data.replace(/\,/g, '<div></div>');
+			}
+			return result;
+		}
+/*]]>*/
+
+</script>
+</body>
+</html>

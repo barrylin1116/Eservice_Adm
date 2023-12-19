@@ -1,0 +1,9 @@
+/.metadata/
+eservice_jd/target/
+eservice_adm/target/
+eservice/target/
+.idea/
+.DS_STore
+.java-version
+keystore.p12
+.scannerwork/

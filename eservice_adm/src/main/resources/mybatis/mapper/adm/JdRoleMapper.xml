@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.twfhclife.adm.dao.JdRoleDao">
+
+    <resultMap id="RoleMap" type="com.twfhclife.adm.model.RoleVo">
+        <result column="ROLE_ID" property="roleId"/>
+        <result column="ROLE_NAME" property="roleName"/>
+        <result column="DESCRIPTION" property="description"/>
+        <result column="PARENT_ROLE_ID" property="parentRoleId"/>
+        <result column="DEPARTMENT_ID" property="departmentId"/>
+        <result column="DEPARTMENT_NAME" property="departmentName"/>
+        <result column="CREATE_USER" property="createUser"/>
+        <result column="CREATE_DATE" property="createDate"/>
+        <result column="MODIFY_USER" property="modifyUser"/>
+        <result column="MODIFY_DATE" property="modifyDate"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ROLE_ID
+        ,ROLE_NAME,DESCRIPTION,PARENT_ROLE_ID,DEPARTMENT_ID,CREATE_USER,CREATE_DATE,MODIFY_USER,MODIFY_DATE,DIV_ROLE_ID
+    </sql>
+
+    <sql id="whereClause">
+        <where>
+            b.DIV_ROLE_ID IS NOT NULL and  a.DEP_NAME IS NOT NULL
+            <if test="roleVo.roleId != null and roleVo.roleId != ''">
+                AND b.ROLE_ID = #{roleVo.roleId}
+            </if>
+            <if test="roleVo.roleName != null and roleVo.roleName != ''">
+                AND b.ROLE_NAME LIKE CONCAT('%',#{roleVo.roleName},'%')
+            </if>
+            <if test="roleVo.description != null and roleVo.description != ''">
+                AND b.DESCRIPTION = #{roleVo.description}
+            </if>
+            <if test="roleVo.parentRoleId != null and roleVo.parentRoleId != ''">
+                AND b.PARENT_ROLE_ID = #{roleVo.parentRoleId}
+            </if>
+            <if test="roleVo.departmentId != null and roleVo.departmentId != ''">
+                AND a.DEP_ID = #{roleVo.departmentId}
+            </if>
+            <if test="roleVo.departmentName != null and roleVo.departmentName != ''">
+                AND a.DEP_NAME LIKE CONCAT('%',#{roleVo.departmentName},'%')
+            </if>
+            <if test="roleVo.createUser != null and roleVo.createUser != ''">
+                AND b.CREATE_USER = #{roleVo.createUser}
+            </if>
+            <if test="roleVo.createDate != null and roleVo.createDate != ''">
+                AND b.CREATE_DATE = #{roleVo.createDate}
+            </if>
+            <if test="roleVo.modifyUser != null and roleVo.modifyUser != ''">
+                AND b.MODIFY_USER = #{roleVo.modifyUser}
+            </if>
+            <if test="roleVo.modifyDate != null and roleVo.modifyDate != ''">
+                AND b.MODIFY_DATE = #{roleVo.modifyDate}
+            </if>
+            <if test="roleVo.systemId != null and roleVo.systemId != ''">
+                AND b.ROLE_ID IN (
+                SELECT ROLE_ID FROM ESERVICE_ADM.DBO.ROLE_SYS_AUTH
+                WHERE SYS_ID = #{roleVo.systemId}
+                )
+            </if>
+        </where>
+    </sql>
+
+    <sql id="wherePkClause">
+        <where>
+            AND ROLE_ID = #{roleVo.roleId}
+            <if test="roleVo.departmentId != null and roleVo.departmentId != ''">
+                AND DEPARTMENT_ID = #{roleVo.departmentId}
+            </if>
+        </where>
+    </sql>
+
+    <!-- include sql: 使用者角色管理查詢結果 -->
+    <sql id="INC1">
+        SELECT
+        b.ROLE_ID,b.ROLE_NAME,b.DESCRIPTION,b.PARENT_ROLE_ID,a.DEP_ID,b.CREATE_USER,b.CREATE_DATE,b.MODIFY_USER,b.MODIFY_DATE,a.DEP_NAME as DEPARTMENT_NAME,b.DIV_ROLE_ID
+        FROM
+        ESERVICE_ADM.DBO.ROLE b
+        left join ESERVICE_JD.DBO.ROLE_DEPARTMENT RD ON RD.ROLE_ID = b.ROLE_ID COLLATE database_default
+        left join ESERVICE_JD.DBO.DEPARTMENT a on RD.DEP_ID=a.DEP_ID COLLATE database_default
+        <include refid="whereClause"/>
+    </sql>
+
+    <!-- 取得使用者角色管理查詢結果(分頁) -->
+    <select id="getRolePageList" resultType="hashmap">
+        SELECT
+        *
+        FROM (
+        SELECT
+        ROW_NUMBER() OVER (ORDER BY ROLE_NAME) AS ROW_NUM
+        ,A.*
+        FROM (
+        <include refid="INC1"/>
+        ) A
+        ) B
+        WHERE
+        B.ROW_NUM <![CDATA[<=]]> #{roleVo.page} * #{roleVo.rows}
+        AND B.ROW_NUM <![CDATA[>]]> (#{roleVo.page} - 1) * #{roleVo.rows}
+    </select>
+
+    <!-- 取得使用者角色管理查詢結果(總筆數) -->
+    <select id="getRolePageTotal" resultType="int">
+        SELECT
+        COUNT(1) AS AMOUNT
+        FROM (
+        <include refid="INC1"/>
+        ) t
+    </select>
+
+    <!-- 取得使用者角色管理查詢結果 -->
+    <select id="getRole" resultMap="RoleMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        ESERVICE_ADM.DBO.ROLE
+        <include refid="whereClause"/>
+    </select>
+
+    <!-- 使用者角色管理-依照使用者權限查詢 -->
+    <select id="getRoleByAuth" resultMap="RoleMap">
+        SELECT
+        R.ROLE_ID,R.ROLE_NAME,R.DESCRIPTION,R.PARENT_ROLE_ID,R.DEPARTMENT_ID,R.CREATE_USER,R.CREATE_DATE,R.MODIFY_USER,R.MODIFY_DATE
+        FROM
+        ESERVICE_ADM.DBO.ROLE R
+        INNER JOIN  ESERVICE_JD.dbo.DEPARTMENT D on R.DEPARTMENT_ID = D.DEP_ID COLLATE database_default
+        <!-- 非系統最高權限管理員，只能查詢使用者所對應的角色 -->
+        <if test="adminUserFlag == 'N'.toString()">
+            WHERE
+            ROLE_ID IN (
+            SELECT ROLE_ID FROM ESERVICE_ADM.DBO.USER_ROLE WHERE USER_ID = #{keyCloakUserId}
+            )
+        </if>
+    </select>
+
+    <!-- 使用者角色管理-新增 -->
+    <insert id="insertRole" useGeneratedKeys="false">
+        declare @temp table(ROLE_ID varchar(50))
+        INSERT INTO ESERVICE_ADM.DBO.ROLE
+        (
+        <include refid="Base_Column_List"/>
+        )
+        output inserted.ROLE_ID into @temp VALUES
+        (
+        NEWID(),
+        #{roleVo.roleName, jdbcType=VARCHAR},
+        #{roleVo.description, jdbcType=VARCHAR},
+        #{roleVo.parentRoleId, jdbcType=VARCHAR},
+        #{roleVo.departmentId, jdbcType=VARCHAR},
+        #{roleVo.createUser, jdbcType=VARCHAR},
+        getdate(),
+        #{roleVo.modifyUser, jdbcType=VARCHAR},
+        getdate(),
+        #{roleVo.divRoleId, jdbcType=VARCHAR}
+        )
+        insert ESERVICE_JD.dbo.ROLE_DEPARTMENT (ROLE_ID,DEP_ID) values ((select * from @temp),#{roleVo.departmentId, jdbcType=VARCHAR})
+        insert INTO ESERVICE_ADM.DBO.ROLE_SYS_AUTH
+        (ROLE_ID,
+        SYS_ID,
+        CREATE_USER,
+        CREATE_DATE)
+        VALUES ((select * from @temp),
+        #{roleVo.systemId, jdbcType=VARCHAR},
+        #{roleVo.createUser, jdbcType=VARCHAR},
+        getdate())
+    </insert>
+
+    <!-- 使用者角色管理-更新 -->
+    <update id="updateRole">
+        UPDATE
+        ESERVICE_ADM.DBO.ROLE
+        <set>
+            <if test="roleVo.roleId != null">ROLE_ID = #{roleVo.roleId},</if>
+            <if test="roleVo.roleName != null">ROLE_NAME = #{roleVo.roleName},</if>
+            <if test="roleVo.description != null">DESCRIPTION = #{roleVo.description},</if>
+            <if test="roleVo.parentRoleId != null">PARENT_ROLE_ID = #{roleVo.parentRoleId},</if>
+            <if test="roleVo.departmentId != null">DEPARTMENT_ID = #{roleVo.departmentId},</if>
+            <if test="roleVo.createUser != null">CREATE_USER = #{roleVo.createUser},</if>
+            <if test="roleVo.createDate != null">CREATE_DATE = #{roleVo.createDate},</if>
+            <if test="roleVo.modifyUser != null">MODIFY_USER = #{roleVo.modifyUser},</if>
+            <if test="roleVo.divRoleId != null">DIV_ROLE_ID = #{roleVo.divRoleId},</if>
+            MODIFY_DATE = getdate()
+        </set>
+        <include refid="wherePkClause"/>
+    </update>
+
+    <!-- 使用者角色管理-刪除 -->
+    <delete id="deleteRole">
+        DELETE ESERVICE_ADM.DBO.ROLE
+        <include refid="wherePkClause"/>
+    </delete>
+
+    <update id="updateRoleDep">
+        UPDATE
+        ESERVICE_JD.DBO.ROLE_DEPARTMENT
+        <set>
+            <if test="roleVo.roleId != null">ROLE_ID = #{roleVo.roleId},</if>
+            <if test="roleVo.departmentId != null">DEP_ID = #{roleVo.departmentId}</if>
+        </set>
+        <include refid="wherePkClause"/>
+    </update>
+
+    <delete id="deleteRoleDep">
+        DELETE ESERVICE_JD.DBO.ROLE_DEPARTMENT
+        where ROLE_ID = #{roleVo.roleId}
+        <if test="roleVo.departmentId != null and roleVo.departmentId != ''">
+        AND DEP_ID = #{roleVo.departmentId}
+        </if>
+    </delete>
+
+    <select id="getNotifyRoles" resultType="hashmap">
+        SELECT
+        b.ROLE_ID, b.ROLE_NAME, d.DEP_NAME PASSAGE_WAY
+        FROM
+        ESERVICE_ADM.DBO.ROLE b
+        INNER JOIN ESERVICE_ADM.DBO.ROLE_SYS_AUTH RSA ON b.ROLE_ID = RSA.ROLE_ID
+        INNER JOIN ESERVICE_JD.DBO.ROLE_DEPARTMENT RD ON b.ROLE_ID = RD.ROLE_ID COLLATE database_default
+        INNER JOIN ESERVICE_JD.DBO.DEPARTMENT D ON D.DEP_ID = RD.DEP_ID COLLATE database_default
+        WHERE RSA.SYS_ID = 'eservice_jd' AND D.DEP_ID = #{vo.passageWay}
+    </select>
+
+<!--    <delete id="deleteRoleSysAuth">-->
+<!--        DELETE ESERVICE_ADM.DBO.ROLE_SYS_AUTH-->
+<!--    </delete>-->
+
+    <select id="getRoleId" resultType="com.twfhclife.adm.model.RoleVo">
+        select r.ROLE_ID from ESERVICE_ADM.DBO.ROLE r
+            left  join ESERVICE_JD.dbo.ROLE_DEPARTMENT rd on
+                r.ROLE_ID = rd.ROLE_ID where r.DIV_ROLE_ID = #{roleId}
+                <if test="depId != null and depId != ''">
+                    and rd.DEP_ID = #{depId}
+                </if>
+                group by r.ROLE_ID
+    </select>
+
+    <select id="getOptionDepRole" resultMap="RoleMap">
+        SELECT * FROM ESERVICE_ADM.dbo.ROLE a
+            left join ESERVICE_JD.dbo.ROLE_DEPARTMENT b on a.ROLE_ID = b.ROLE_ID COLLATE database_default
+            left join ESERVICE_ADM.dbo.ROLE_SYS_AUTH s on a.ROLE_ID = s.ROLE_ID
+        <where>
+            <if test="depId != null and depId != ''">
+                AND b.DEP_ID = #{depId}
+            </if>
+            AND s.SYS_ID = 'eservice_jd'
+        </where>
+    </select>
+
+    <select id="getDepRole" resultMap="RoleMap">
+        SELECT * FROM ESERVICE_ADM.dbo.ROLE a left join ESERVICE_JD.dbo.ROLE_DEPARTMENT b on a.ROLE_ID = b.ROLE_ID COLLATE database_default
+        <where>
+            b.DEP_ID = #{depId}
+            <!-- 非系統最高權限管理員，只能查詢使用者所對應的角色 -->
+          <!--  <if test="adminUserFlag == 'N'.toString()">
+                AND a.ROLE_ID IN (
+                SELECT ROLE_ID FROM ESERVICE_ADM.DBO.USER_ROLE WHERE USER_ID = #{keyCloakUserId}
+                )
+            </if>-->
+        </where>
+    </select>
+
+    <insert id="insertUserRole">
+        insert ESERVICE_ADM.dbo.USER_ROLE (USER_ID,ROLE_ID)values(#{userId, jdbcType=VARCHAR},#{roleId, jdbcType=VARCHAR})
+    </insert>
+
+    <update id="updateUserRole">
+        update ESERVICE_ADM.dbo.USER_ROLE set ROLE_ID = #{roleId} where  USER_ID = #{userId}
+    </update>
+
+    <select id="countRoleDep" resultType="int">
+        select count(1) from ESERVICE_ADM.dbo.ROLE r left join ESERVICE_JD.dbo.ROLE_DEPARTMENT dr on r.ROLE_ID = dr.ROLE_ID
+                        where r.DIV_ROLE_ID = #{roleId} and dr.DEP_ID = #{depId}
+    </select>
+
+    <select id="countUserRole" resultType="int">
+        select COUNT(1) from ESERVICE_ADM.dbo.USER_ROLE where USER_ID = #{userId} and ROLE_ID = #{roleId}
+    </select>
+
+    <select id="roleByUserList" resultMap="RoleMap">
+        SELECT
+        R.ROLE_ID,R.ROLE_NAME,R.DESCRIPTION,R.PARENT_ROLE_ID,R.DEPARTMENT_ID,R.CREATE_USER,R.CREATE_DATE,R.MODIFY_USER,R.MODIFY_DATE
+        FROM
+        ESERVICE_ADM.DBO.ROLE R
+        inner join ESERVICE_JD.dbo.ROLE_DEPARTMENT rd on R.ROLE_ID = rd.ROLE_ID
+        INNER JOIN  ESERVICE_JD.dbo.DEPARTMENT D on rd.DEP_ID = D.DEP_ID  COLLATE database_default
+        where
+        <if test="roleVo.departmentName != null and roleVo.departmentName != ''">
+            D.PARENT_DEP IN ( SELECT DEP_ID FROM ESERVICE_JD.dbo.DEPARTMENT
+            where DEP_NAME = #{roleVo.departmentName} )
+        </if>
+        group by R.ROLE_ID,R.ROLE_NAME,R.DESCRIPTION,R.PARENT_ROLE_ID,R.DEPARTMENT_ID,R.CREATE_USER,R.CREATE_DATE,R.MODIFY_USER,R.MODIFY_DATE
+    </select>
+</mapper>
+

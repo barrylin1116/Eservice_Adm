@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.twfhclife.adm.dao.JdUserDepartmentDao">
+
+	<resultMap id="UserDepartmentMap" type="com.twfhclife.adm.model.UserDepartmentVo" >
+		<result column="USER_ID" property="userId"/>
+		<result column="DEP_ID" property="depId"/>
+		<result column="TITLE_ID" property="titleId"/>
+	</resultMap>
+
+	<resultMap id="UserDepartmentListMap" type="com.twfhclife.adm.model.UserDepartmentVo" extends="UserDepartmentMap">
+		<result column="DEP_NAME" property="depName"/>
+		<result column="TITLE_NAME" property="titleName"/>
+	</resultMap>
+	
+	<sql id="whereClause">
+		<where>
+			<if test="userDepartmentVo.userId != null and userDepartmentVo.userId != ''"> AND UD.USER_ID = #{userDepartmentVo.userId} </if>
+			<if test="userDepartmentVo.depId != null and userDepartmentVo.depId != ''"> AND UD.DEP_ID = #{userDepartmentVo.depId} </if>
+			<if test="userDepartmentVo.titleId != null and userDepartmentVo.titleId != ''"> AND UD.TITLE_ID = #{userDepartmentVo.titleId} </if>
+			<if test="userDepartmentVo.branchId != null and userDepartmentVo.branchId != ''">
+				UD.BRANCH_ID = #{userDepartmentVo.branchId}
+			</if>
+		</where>
+	</sql>
+	
+	<!-- include sql: 人員職位管理查詢結果 -->
+	<sql id="INC1">
+		SELECT UD.USER_ID, UD.DEP_ID, UD.DEP_NAME, UD.BRANCH_ID,
+		(select DEP_NAME from ESERVICE_JD.dbo.DEPARTMENT where BRANCH_ID = UD.BRANCH_ID AND PARENT_DEP = UD.DEP_ID) AS BRANCH_NAME
+		FROM
+		(SELECT UDT.USER_ID ,UDT.DEP_ID ,DT.DEP_NAME ,UDT.BRANCH_ID
+		FROM ESERVICE_JD.DBO.USER_DEPARTMENT UDT
+		LEFT OUTER JOIN ESERVICE_JD.DBO.DEPARTMENT DT ON UDT.DEP_ID = DT.DEP_ID) UD
+		LEFT JOIN ESERVICE_JD.dbo.DEPARTMENT D ON UD.DEP_ID = D.PARENT_DEP
+		AND UD.BRANCH_ID = D.BRANCH_ID
+		<include refid="whereClause" />
+	</sql>
+	
+	<!-- 取得人員職位管理查詢結果(分頁) -->
+	<select id="getUserDepartmentPageList" resultType="hashmap">
+		SELECT
+			*
+		FROM (
+			SELECT
+				ROW_NUMBER() OVER (ORDER BY USER_ID) AS ROW_NUM
+				,A.*
+			FROM (
+				<include refid="INC1" />
+			) A
+		) B		
+		WHERE
+			B.ROW_NUM <![CDATA[<=]]> #{userDepartmentVo.page} * #{userDepartmentVo.rows}
+			AND B.ROW_NUM <![CDATA[>]]> (#{userDepartmentVo.page} - 1) * #{userDepartmentVo.rows}	
+	</select>
+	
+	<!-- 取得人員職位管理查詢結果(總筆數) -->
+	<select id="getUserDepartmentPageTotal" resultType="int">
+		SELECT
+			COUNT(1) AS AMOUNT
+		FROM (
+			<include refid="INC1" />
+		) t
+	</select>
+	
+	<!-- 取得人員職位管理查詢結果 -->
+	<select id="getUserDepartment" resultMap="UserDepartmentListMap">
+		SELECT
+		UD.USER_ID
+		,UD.DEP_ID
+		,UD.TITLE_ID
+		,D.DEP_NAME
+		,J.TITLE_NAME
+		FROM
+		ESERVICE_JD.DBO.USER_DEPARTMENT UD
+		INNER  JOIN ESERVICE_JD.dbo.DEPARTMENT D ON UD.DEP_ID = d.DEP_ID
+		LEFT  JOIN ESERVICE_ADM.DBO.JOB_TITLE J ON UD.TITLE_ID = J.TITLE_ID COLLATE database_default
+		<include refid="whereClause" />
+	</select>
+	
+	<!-- 人員職位管理-新增 -->
+	<insert id="insertUserDepartment">
+		INSERT INTO ESERVICE_JD.DBO.USER_DEPARTMENT
+		(
+			USER_ID
+			,DEP_ID
+			,TITLE_ID
+			,BRANCH_ID
+		)
+		VALUES
+		(
+			#{userDepartmentVo.userId, jdbcType=VARCHAR},
+			#{userDepartmentVo.depId, jdbcType=VARCHAR},
+			#{userDepartmentVo.titleId, jdbcType=VARCHAR},
+			#{userDepartmentVo.branchId, jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<!-- 人員職位管理-更新 -->
+	<update id="updateUserDepartment">
+		UPDATE
+		ESERVICE_JD.DBO.USER_DEPARTMENT UD
+		<set>
+			<if test="userDepartmentVo.userId != null"> UD.USER_ID = #{userDepartmentVo.userId}, </if>
+			<if test="userDepartmentVo.depId != null"> UD.DEP_ID = #{userDepartmentVo.depId}, </if>
+			<if test="userDepartmentVo.titleId != null"> UD.TITLE_ID = #{userDepartmentVo.titleId}, </if>
+			<if test="userDepartmentVo.branchId != null"> UD.BRANCH_ID = #{userDepartmentVo.branchId},</if>
+		</set>
+		<include refid="whereClause" />
+	</update>
+	
+	<!-- 人員職位管理-刪除 -->
+	<delete id="deleteUserDepartment">
+		DELETE ESERVICE_JD.DBO.USER_DEPARTMENT
+		WHERE 
+			USER_ID = #{userDepartmentVo.userId}
+			AND DEP_ID = #{userDepartmentVo.depId}
+			<if test="userDepartmentVo.branchId != null and userDepartmentVo.branchId != ''">
+				AND BRANCH_ID = #{userDepartmentVo.branchId}
+			</if>
+			<if test="userDepartmentVo.titleId != null and userDepartmentVo.titleId != ''"> 
+			AND TITLE_ID = #{userDepartmentVo.titleId}
+			</if>
+	</delete>
+
+	<select id="getUserBranch" resultMap="UserDepartmentListMap">
+		SELECT
+		UD.USER_ID,
+		D.DEP_NAME AS branchName
+		FROM
+		ESERVICE_JD.DBO.USER_DEPARTMENT UD
+		INNER JOIN ESERVICE_JD.dbo.DEPARTMENT D ON UD.DEP_ID = D.PARENT_DEP AND UD.BRANCH_ID = D.BRANCH_ID
+		<where>
+			<if test="userDepartmentVo.userId != null and userDepartmentVo.userId != ''"> AND UD.USER_ID = #{userDepartmentVo.userId} </if>
+			<if test="userDepartmentVo.branchId != null and userDepartmentVo.branchId != ''">
+				D.BRANCH_ID = #{userDepartmentVo.branchId}
+			</if>
+		</where>
+	</select>
+
+	<select id="countUserDep" resultType="int">
+		select count(1) from ESERVICE_JD.dbo.USER_DEPARTMENT WHERE USER_ID = #{userId}
+	</select>
+</mapper>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.twfhclife.adm.dao.JdUserDao">
+
+    <sql id="Base_Column_List">
+        USER_ID,USER_TYPE,ESERVICE.DBO.FN_DEBASE64(ROC_ID) AS ROC_ID,MOBILE,EMAIL,LOGIN_FAIL_COUNT,LAST_CHANG_PASSWORD_DATE,SMS_FLAG,MAIL_FLAG,FB_ID,MOICA_ID,CREATE_DATE,CREATE_USER
+        ,ONLINE_FLAG,STATUS,USER_NAME ,LOGIN_TIME,CLAUSE_FLAG,SERIAL_NUM,IC_ID,LOGIN_SIZE,EFFECTIVE_DATE,EXPIRATION_DATE
+    </sql>
+
+    <select id="getUser" resultType="com.twfhclife.adm.model.JdUserVo">
+        select a.LOGIN_SIZE,ROC_ID,a.USER_ID,a.STATUS,a.IC_ID,c.DEP_ID,e.BRANCH_ID from ESERVICE_JD.dbo.USERS a left join ESERVICE_ADM.dbo.USER_ENTITY b on a.USER_ID = b.USERNAME
+        left join ESERVICE_JD.dbo.USER_DEPARTMENT c on b.ID = c.USER_ID
+        left join ESERVICE_ADM.dbo.USER_ROLE d on b.ID = d.USER_ID
+        left join ESERVICE_JD.dbo.DEPARTMENT e on e.DEP_ID = c.DEP_ID
+        where a.USER_ID = #{rocId} group by a.LOGIN_SIZE,ROC_ID,a.USER_ID,a.STATUS,a.IC_ID,c.DEP_ID,e.BRANCH_ID
+    </select>
+
+    <select id="getUserIC" resultType="com.twfhclife.adm.model.JdUserVo">
+        select * from ESERVICE_JD.dbo.USERS a
+            left join ESERVICE_ADM.dbo.USER_ENTITY c on a.USER_ID = c.USERNAME
+            left join  ESERVICE_JD.dbo.USER_DEPARTMENT b on c.ID = b.USER_ID
+        <where>
+            <if test="depId != null and depId != ''">
+                AND b.DEP_ID = #{depId}
+            </if>
+            <if test="icId != null and icId != ''">
+                AND a.IC_ID = #{icId}
+            </if>
+        </where>
+
+    </select>
+
+    <insert id="insertUserIC">
+        insert
+        ESERVICE_JD.dbo.USER_IC
+        (USER_ID,
+        DEP_ID,
+        BRANCH_ID)
+        VALUES
+        (
+        (SELECT A.ID FROM ESERVICE_ADM.DBO.USER_ENTITY A INNER JOIN ESERVICE_JD.DBO.USERS B ON A.USERNAME = B.USER_ID
+        AND A.REALM_ID = 'elife_jdzq'
+        WHERE B.IC_ID = #{jdUserVo.icId,jdbcType=VARCHAR}),
+        (SELECT TOP 1 DEP_ID FROM ESERVICE_JD.DBO.DEPARTMENT WHERE BRANCH_ID = #{jdUserVo.depId,jdbcType=VARCHAR}),
+        #{jdUserVo.branchId,jdbcType=VARCHAR})
+    </insert>
+
+    <delete id="deleteUserIC">
+        DELETE
+        ESERVICE_JD.dbo.USER_IC WHERE USER_ID = #{jdUserVo.userId}
+    </delete>
+
+    <update id="updateUserIC">
+        update
+        ESERVICE_JD.dbo.USER_IC
+        <set>
+        <if test="roleVo.userId != null and jdUserVo.userId != ''"> USER_ID = #{jdUserVo.userId},</if>
+        <if test="roleVo.userType != null and jdUserVo.userType != ''"> DEP_ID = #{jdUserVo.depId}</if>
+        </set>
+        <where>
+            <if test="roleVo.userId != null and jdUserVo.userId != ''"> USER_ID = #{jdUserVo.userId }</if>
+        </where>
+    </update>
+
+    <select id="getIcId" resultType="com.twfhclife.adm.model.JdUserVo">
+        select b.ID userId, c.DEP_ID, a.IC_ID from ESERVICE_JD.dbo.USERS a
+        left join ESERVICE_ADM.dbo.USER_ENTITY b on a.USER_ID = b.USERNAME
+        left join ESERVICE_JD.dbo.USER_DEPARTMENT c on b.ID = c.USER_ID
+        left join ESERVICE_ADM.dbo.USER_ROLE d  on b.ID = d.USER_ID
+        left join ESERVICE_ADM.dbo.ROLE e on d.ROLE_ID = e.ROLE_ID
+        <where>
+            e.DIV_ROLE_ID = 'IC_PERSONNEL'
+            <if test="icId != null and icId != ''">
+              and  a.IC_ID = #{icId}
+            </if>
+            <if test="depId != null and depId != ''">
+                and c.DEP_ID = #{depId}
+            </if>
+        </where>
+    </select>
+
+    <select id="countUserIc" resultType="int">
+        select COUNT(1) from ESERVICE_JD.dbo.USER_IC where USER_ID =  #{userId}
+    </select>
+
+    <select id="countUser" resultType="int">
+        select count(1) from ESERVICE_JD.dbo.USERS
+        <where>
+            <if test="rocId != null and rocId != ''">
+                USER_ID = #{rocId}
+            </if>
+        </where>
+    </select>
+
+    <select id="countLoginSize" resultType="int">
+        select count(1) from ESERVICE_JD.dbo.USERS where LOGIN_SIZE = #{loginSize}
+    </select>
+</mapper>

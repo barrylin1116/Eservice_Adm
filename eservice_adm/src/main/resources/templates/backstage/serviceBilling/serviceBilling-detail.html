@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<th:block th:replace="fragments/head"/>
+</head>
+<body class="no-skin">
+<th:block th:replace="fragments/navbar"/>
+<div class="main-container my-save-state" id="main-container">
+	<script type="text/javascript">
+				try{my.settings.loadState('main-container')}catch(e){}
+			</script>
+	<div th:replace="fragments/sidebar :: sidebar (funId='loginRecord')"></div>
+	<div class="main-content">
+		<div class="main-content-inner">
+			<div class="breadcrumbs my-save-state" id="breadcrumbs">
+				<ul class="breadcrumb">
+					<li>
+						<i class="fa fa-search-plus" aria-hidden="true"></i>
+						<a href="#">服務計費明細對帳管理</a>
+					</li>
+				</ul>
+			</div>
+			<div class="page-content">
+				<div class="page-header">
+					<h1>
+						服務計費明細對帳管理
+						<small>
+							<i class="my-icon fa fa-angle-double-right"></i>
+							服務計費明細對帳查詢
+						</small>
+					</h1>
+				</div>
+				<div class="row">
+					<div class="col-xs-12">
+						<!-- PAGE CONTENT BEGINS -->
+						<form class="form-horizontal" method="post" id="form1" role="form">
+							<div class="form-group">
+								<label class="col-sm-3 control-label no-padding-right" for="form-field-1-1">服務類型 </label>
+								<div class="col-sm-9">
+									<select class="form-control" name="serviceType">
+										<option value="">所有案件</option>
+										<option value="claim">所有理賠相關</option>
+										<option value="claimFrom">理賠案件(首家)</option>
+										<option value="claimTo">理賠案件(轉收家)</option>
+										<option value="claimFromFileScan">理賠案件(首家)惡意檔案掃描</option>
+										<option value="claimToFileScan">理賠案件(轉收家)惡意檔案掃描</option>
+										<option value="user">所有保全相關</option>
+										<option value="userFrom">保全案件(首家)</option>
+										<option value="userTo">保全案件(轉收家)</option>
+										<option value="userFromFileScan">保全案件(首家)惡意檔案掃描</option>
+										<option value="userToFileScan">保全案件(轉收家)惡意檔案掃描</option>
+										<option value="eins">所有電子保單相關</option>
+										<option value="einsComment">批註單</option>
+										<option value="ihs">所有理賠醫起通相關</option>
+										<option value="ihsFileScan">醫起通惡意檔案掃描</option>
+										<option value="ids">身份認證中心</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label no-padding-right" for="form-field-4">對帳月份</label>
+								<div class="col-sm-9">
+									<div class="input-group date">
+										<span class="input-group-addon">
+											<i class="fa fa-calendar bigger-110"></i>
+										</span>
+										<input type="text" id="billingDate" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+									</div>
+								</div>
+							</div>
+							<div class="clearfix form-actions">
+								<div class="col-md-offset-3 col-md-9">
+									<button id="qryBtn" class="btn btn-success" type="button">
+										<i class="my-icon fa fa-check bigger-110"></i>
+										查詢
+									</button>
+									&nbsp; &nbsp; &nbsp;
+									<button class="btn" type="reset">
+										<i class="my-icon fa fa-undo bigger-110"></i>
+										重新輸入
+									</button>
+								</div>
+							</div>
+						</form>
+						<div class="hr hr-18 dotted hr-double"></div>
+						<div class="row">
+							<div class="col-xs-12">
+								<div id="show-detail-results" hidden="true">
+									<h3 class="header smaller lighter blue">查詢結果</h3>
+									<div>
+										<div id="showMessage" class="alert alert-info">
+											<i class="my-icon fa fa-hand-o-right"></i>
+											<span id="errorMsg"></span>
+										</div>
+										<table id="grid"></table>
+										<div id="pager"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:replace="fragments/footer"></div>
+	<a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">
+		<i class="my-icon fa fa-angle-double-up icon-only bigger-110"></i>
+	</a>
+</div>
+<th:block th:replace="fragments/script"/>
+<script th:src="@{/js/bootstrap-datetimepicker.min.js}"></script>
+<script th:inline="javascript">
+	/*<![CDATA[*/
+	var grid;
+	$(function() {
+		$('#billingDate').datetimepicker({
+			format : 'YYYY-MM'
+		});
+		grid = new jqGridUtil();
+		grid.id = '#grid';
+		grid.url = /*[[@{/spa401}]]*/;
+		grid.pager = '#pager';
+		grid.caption = '服務計費明細對帳查詢';
+		grid.colNames = ['Details', '服務類型', '案件編號/保單號碼', '案件編號-序號', '日期', '是否為保戶', '回報日期', '回報狀態'];
+		grid.colModel = [
+			{ name:'details', index:'details', sortable:false,formatter: function(cellvalue, options, row) {
+				return '<div class="action-buttons center"><a href="javascript:void(0);" onclick="showDetail(this,\'' + row.id + '\', \'' + row.orgId + '\', \'' + row.hospital + '\', \'' + row.serviceType + '\', \'' + row.caseNo + '\', \'' + row.linkId + '\', \'' + row.eventTime + '\', \'' + row.fileSize + '\', \'' + row.fee + '\', \'' + row.reportState + '\', \'' + row.reportMessage + '\')" class="green bigger-140 show-details-btn" title="Show Details"><i class="my-icon fa fa-angle-double-down"></i><span class="sr-only">Details</span></a></div>'
+			}},
+			{name:'serviceType',index:'serviceType'},
+			{name:'caseNo',index:'caseNo'},
+			{name:'linkId',index:'linkId'},
+			{name:'eventTime',index:'eventTime'},
+			{name:'inEservice',index:'inEservice'},
+			{name:'replayTime',index:'replayTime'},
+			{name:'replayStatus',index:'replayStatus'}
+		];
+		// 查詢
+		var oGrid
+		$('#qryBtn').click(function() {
+			if ($("#billingDate").val() == null || $("#billingDate").val() == '') {
+				alertMsg("對帳月份為必輸條件")
+				return false;
+			}
+			var newFormData = new FormData()
+			newFormData['serviceType'] = $("[name='serviceType'] option:selected").val()
+			newFormData['verifyDate'] = $('#billingDate').val();
+			newFormData['pageSize'] = 10;
+			newFormData['pageNumber'] = 1;
+			// 顯示查詢結果
+			if (oGrid) {
+				oGrid.jqGrid('clearGridData');
+				var postData = $(grid.id).jqGrid('getGridParam', 'postData');
+				for (key in newFormData) {
+					postData[key] = newFormData[key];
+				}
+				postData['page'] = 1; // 重新設定第一頁
+				$(grid.id).jqGrid('setGridParam', postData).trigger("reloadGrid");
+			} else {
+				oGrid = $(grid.id).jqGrid({
+					url: grid.url,
+					datatype: grid.datatype,
+					mtype: grid.mtype,
+					ajaxGridOptions: {
+						cache: false,
+						contentType: 'application/json'
+					},
+					serializeGridData: function(postData) {
+						// 由查詢物件取出放入postData
+						for (key in newFormData) {
+							postData[key] = newFormData[key];
+						}
+						postData['serviceType'] = $("[name='serviceType'] option:selected").val()
+						postData['verifyDate'] = $('#billingDate').val();
+						return JSON.stringify(postData);
+					},
+					jsonReader: {
+						root: function (obj) {return obj.resultData ? obj.resultData.details : []; },
+						page: function (obj) {return obj.resultData ? obj.resultData.currentPage : 1; },
+						total: function (obj) { return obj.resultData ? obj.resultData.totalPage : 1; },
+						records: function (obj) { return obj.resultData ? obj.resultData.totalNum : 1; }
+					},
+					colNames: grid.colNames,
+					colModel: grid.colModel,
+					pager: grid.pager,
+					sortable: grid.sortable,
+					rowNum: grid.rowNum,
+					height: 500,
+					altRows: true,
+					rowList: grid.rowList,
+					viewrecords: grid.viewrecords,
+					caption: grid.caption,
+					loadComplete: function(response) {
+						if (response.result == 'SUCCESS') {
+							$('#showMessage').hide();
+						} else {
+							$('#errorMsg').text(response.resultMsg);
+							$('#showMessage').show();
+						}
+						// 重新設定寬度
+						var newWidth = $(grid.id).closest(".ui-jqgrid").parent().width();
+						$(grid.id).jqGrid("setGridWidth", newWidth, true);
+						updatePagerIcons();
+					},
+			});
+			$('#show-detail-results').show();
+			}
+		});
+
+		// 重新輸入
+		$('#resetBtn').click(function() {
+			$('#form1')[0].reset();
+			$('.chosen-select').val('').trigger('chosen:updated'); // 重置下拉選單
+		});
+	});
+
+	function toEdit(messagingTemplateId) {
+		$('#editForm #messagingTemplateId').val(messagingTemplateId);
+		$('#editForm')[0].submit();
+	}
+
+	var gridList = [];
+	function showDetail(detailBtnObj, id, orgId, hospital, serviceType, caseNo, linkId, eventTime, fileSize, fee, reportState, reportMessage) {
+		var trObj = $(detailBtnObj).closest('tr');
+		var iObj = $(detailBtnObj).find('i');
+		var detailHtml = "<tr class=\"detail-row even open\" role=\"row\"> <td colspan=\"7\"> <div class=\"table-detail\"><form id=\"billing_form_" + id + "\">" +
+				"<input type=\"hidden\" name=\"id\" value=\"" + id + "\" />" +
+				"<input type=\"hidden\" name=\"orgId\" value=\"" + orgId + "\" />" +
+				"<input type=\"hidden\" name=\"hospital\" value=\"" + hospital + "\" />" +
+				"<input type=\"hidden\" name=\"serviceType\" value=\"" + serviceType + "\" />" +
+				"<input type=\"hidden\" name=\"caseNo\" value=\"" + caseNo + "\" />" +
+				"<input type=\"hidden\" name=\"linkId\" value=\"" + linkId + "\" />" +
+				"<input type=\"hidden\" name=\"eventTime\" value=\"" + eventTime + "\" />" +
+				"<input type=\"hidden\" name=\"fileSize\" value=\"" + fileSize + "\" />" +
+				"<input type=\"hidden\" name=\"fee\" value=\"" + fee + "\" />" +
+				"<div class=\"row\" style=\"background-color: #fff; border-bottom: none\"> <div class=\"col-xs-12 col-sm-11\"> <div class=\"space visible-xs\"> </div> <div class=\"profile-user-info profile-user-info-striped\"> <div class=\"profile-info-row\"> <div class=\"profile-info-name\">回報狀態</div> <div style=\"display:inline-flex;\" class=\"profile-info-value\">" +
+				"<select style=\"height: 100%; width: 180px;\" class=\"form-control\" name=\"status\"> "
+				if(reportState=='INIT'){
+					detailHtml += "<option value=\"INIT\" selected=\"selected\">資料OK</option><option value=\"ERROR\">資料有問題</option>"
+				}else {
+					detailHtml += "<option value=\"INIT\">資料OK</option><option value=\"ERROR\" selected=\"selected\">資料有問題</option>"
+				}
+				detailHtml += "</select>&nbsp;&nbsp;&nbsp;<button class=\"form-control\" style=\"margin:0; background: orange; color: white; height:31px;\" onclick=\"updateBillingStatus('" + id + "')\">狀態回報更新</button></div></div> <div class=\"profile-info-row\"> <div class=\"profile-info-name\">回報錯誤訊息</div> <div class=\"profile-info-value\" style=\"position: relative;\"><span class=\"tg-list-item\"> " +
+						"<textarea name=\"msg\" rows=\"3\" cols=\"50\" class=\"col-sm-10\" >" + reportMessage + "</textarea><label class=\"checkboxY-btn\" data-tg-off=\"ON\" data-tg-on=\"OFF\" for=\"cb2\"> </label> </span> </div></form> </div> </div> </div> <div id=\"202305190001\" class=\"col-xs-12 col-sm-11\"> <div class=\"panel panel-default profile-user-info\"> <div class=\"panel-heading\"> </div> <div class=\"panel-body clear1\" id=\"poliyClaimsDetail\"> <div class=\"mycigna3\"> <div class=\"col-md-12 detailPolicy\"> <div class=\"col-md-12 detailPolicy\"> <div class=\"form-horizontal\"> <div class=\"form-group\"> <label class=\"col-xs-3\">資料序號：</label> <div class=\"col-xs-9\" id=\"label_apply_item\">" + id + "</div> </div> <div class=\"form-group\"> <label class=\"col-xs-3\">公司代號：</label> <div class=\"col-xs-9\"> <span>" + orgId + "</span> </div> </div> <div class=\"form-group\"> <label class=\"col-xs-3\">醫院名稱：</label> <div class=\"col-xs-9\">" + hospital + "</div> </div> <div class=\"form-group\"> <label class=\"col-xs-3\">服務類型：</label> <div class=\"col-xs-9\"> <span>" + serviceType + "</span> </div> </div> <div class=\"form-group\"> <label class=\"col-xs-3\">案件編號/保單號碼：</label> <div class=\"col-xs-9\"> <span>" + caseNo + "</span> </div> </div> <div class=\"form-group\"> <label class=\"col-xs-3\">案件編號-序號：</label> <div class=\"col-xs-9\"> <span>" + linkId + "</span> </div> </div> <div class=\"form-group\"> <label class=\"col-xs-3\">日期：</label> <div class=\"col-xs-9\"> <span>" + eventTime + "</span> </div> </div> <div class=\"form-group\"> <label class=\"col-xs-3\">檔案大小：</label> <div class=\"col-xs-9\"> <span>" + fileSize + "k</span> </div> </div><div class=\"form-group\"> <label class=\"col-xs-3\">費用：</label> <div class=\"col-xs-9\"> <span>" + fee + "</span> </div> </div> </div> </div> </div> </div> </div> </div> </div> </div> </div> </div> </td> </tr>"
+		if (iObj.hasClass('fa-angle-double-down')) {
+			$(detailHtml).insertAfter(trObj);
+			iObj.removeClass('fa-angle-double-down');
+			iObj.addClass('fa-angle-double-up');
+		} else if (iObj.hasClass('fa-angle-double-up')) {
+			// 刪除明細內容
+			var detailTr = $(detailBtnObj).closest('tr').next();
+			if (detailTr.hasClass('detail-row')) {
+				detailTr.remove();
+			}
+			iObj.removeClass('fa-angle-double-up');
+			iObj.addClass('fa-angle-double-down');
+		}
+	}
+
+	function updateBillingStatus(id) {
+		event.preventDefault();
+		event.stopPropagation();
+		var formData = new FormData($("#billing_form_" + id)[0])
+		params = {}
+		for(var entry of formData.entries()) {
+			if (entry[1] != null && entry[1] != '' && entry[1] != "null" ) {
+				params[entry[0]] = entry[1]
+			}
+		}
+		$.ajax({
+            url: /*[[@{spa402}]]*/,
+            type: 'POST',
+            data : JSON.stringify(params),
+            contentType: "application/json",
+            success: function (response) {
+                alertMsg('明細對帳問題回報狀態更新成功');
+            },
+            error: function (response) {
+                alertMsg('系統發生錯誤');
+            }
+        });
+	}
+	/*]]>*/
+</script>
+</body>
+</html>
