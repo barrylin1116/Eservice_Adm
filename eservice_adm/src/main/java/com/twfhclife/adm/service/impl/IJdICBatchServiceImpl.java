@@ -139,7 +139,9 @@ public class IJdICBatchServiceImpl implements IJdICBatchService {
         jdBatchPlanDao.addBatchPlan(jdBatchSchedulVO);
     }
 
-    @Scheduled(cron = "*/5 * * * * *")
+    //每隔10分鐘
+    //@Scheduled(cron = "*/5 * * * * ?")
+    @Scheduled(cron = "0 0/10 * * * ? ")
     private void scheduledICWork() throws IOException {
         workICFile();
     }
