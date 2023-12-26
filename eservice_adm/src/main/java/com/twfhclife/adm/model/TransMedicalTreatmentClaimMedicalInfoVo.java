@@ -56,6 +56,16 @@ public class TransMedicalTreatmentClaimMedicalInfoVo implements Serializable{
 	 */
 	private String depid;
 
+	/**
+	 * 無資料原因
+	 */
+	private String noDataReason;
+
+	/**
+	 * 是否提供json格式資料
+	 */
+	private String hasJson;
+
 
 	private List<Map<String, String>> dtypeList = Lists.newArrayList();
 
@@ -143,5 +153,21 @@ public class TransMedicalTreatmentClaimMedicalInfoVo implements Serializable{
 
 	public void setDtypeList(List<Map<String, String>> dtypeList) {
 		this.dtypeList = dtypeList;
+	}
+
+	public String getNoDataReason() {
+		return noDataReason;
+	}
+
+	public void setNoDataReason(String noDataReason) {
+		this.noDataReason = noDataReason;
+	}
+
+	public String getHasJson() {
+		return hasJson;
+	}
+
+	public void setHasJson(String hasJson) {
+		this.hasJson = hasJson;
 	}
 }

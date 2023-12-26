@@ -3315,6 +3315,8 @@
 		<result column="OTYPE_NAME" property="otypeName"/>
 		<result column="DEP_NAME" property="depName"/>
 		<result column="SUB_DEP_NAME" property="subDepName"/>
+		<result column="NO_DATA_REASON" property="noDataReason"/>
+		<result column="HAS_JSON" property="hasJson"/>
 		<association property="dtypeList" resultMap="DtypeMap"/>
 	</resultMap>
 
@@ -3328,7 +3330,7 @@
 	</resultMap>
 
 	<select id="getMedicalInfoByClaimId" resultMap="MedicalInfoMap">
-		select  CONVERT(VARCHAR(100), MI_ID) MI_ID, HS_TIME, HE_TIME, OTYPE_NAME, DEP_NAME, SUB_DEP_NAME, DTYPE_NAME, DTYPE, FILE_BASE64, FILE_NAME, FILE_ID FROM
+		select  CONVERT(VARCHAR(100), MI_ID) MI_ID, HS_TIME, HE_TIME, OTYPE_NAME, DEP_NAME, SUB_DEP_NAME, DTYPE_NAME, DTYPE, FILE_BASE64, FILE_NAME, FILE_ID, NO_DATA_REASON, HAS_JSON FROM
 		ESERVICE.dbo.TRANS_MEDICAL_TREATMENT_CLAIM_MEDICALINFO
 		where CLAIMS_SEQ_ID = #{claimSeqId}
 	</select>
