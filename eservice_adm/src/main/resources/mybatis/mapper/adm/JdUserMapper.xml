@@ -8,7 +8,8 @@
     </sql>
 
     <select id="getUser" resultType="com.twfhclife.adm.model.JdUserVo">
-        select a.LOGIN_SIZE,ROC_ID,a.USER_ID,a.STATUS,a.IC_ID,c.DEP_ID,e.BRANCH_ID from ESERVICE_JD.dbo.USERS a left join ESERVICE_ADM.dbo.USER_ENTITY b on a.USER_ID = b.USERNAME
+        select a.LOGIN_SIZE,ROC_ID,a.USER_ID,a.STATUS,a.IC_ID,c.DEP_ID,e.BRANCH_ID
+        from ESERVICE_JD.dbo.USERS a left join ESERVICE_ADM.dbo.USER_ENTITY b on a.USER_ID = b.USERNAME AND b.REALM_ID = 'elife_jdzq'
         left join ESERVICE_JD.dbo.USER_DEPARTMENT c on b.ID = c.USER_ID
         left join ESERVICE_ADM.dbo.USER_ROLE d on b.ID = d.USER_ID
         left join ESERVICE_JD.dbo.DEPARTMENT e on e.DEP_ID = c.DEP_ID
