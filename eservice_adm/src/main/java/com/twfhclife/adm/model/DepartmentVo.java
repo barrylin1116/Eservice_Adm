@@ -16,6 +16,7 @@ public class DepartmentVo extends Pagination {
 	private String modifyUser;
 	private Date modifyDate;
 	private String branchId;
+	private String channelType;
 	public void setBranchId(String branchId) {
 		this.branchId = branchId;
 	}
@@ -24,8 +25,6 @@ public class DepartmentVo extends Pagination {
 		return branchId;
 	}
 
-
-	
 	public String getDepId() {
 		return depId;
 	}
@@ -74,7 +73,15 @@ public class DepartmentVo extends Pagination {
 	public void setModifyDate(Date modifyDate) {
 		this.modifyDate = modifyDate;
 	}
-	
+
+	public String getChannelType() {
+		return channelType;
+	}
+
+	public void setChannelType(String channelType) {
+		this.channelType = channelType;
+	}
+
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);

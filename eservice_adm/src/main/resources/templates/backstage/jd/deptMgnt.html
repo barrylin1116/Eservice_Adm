@@ -97,6 +97,16 @@
 															<input type="text" id="branchId" class="form-control" />
 														</div>
 													</fieldset>
+													<fieldset id="channelTypeField">
+														<label class="col-sm-4 control-label no-padding-right"><label class="red">*</label>通路類型：</label>
+														<div class="col-sm-8">
+															<select id="channelTypeSelect" class="form-control" >
+																<option value="" checked>請選擇</option>
+																<option value="bank" checked>銀行通路</option>
+																<option value="normal" checked>一般通路</option>
+															</select>
+														</div>
+													</fieldset>
 													<fieldset>
 														<label class="col-sm-4 control-label no-padding-right">附註說明：</label>
 														<div class="col-sm-8">
@@ -183,6 +193,16 @@
 												<input type="text" id="branchId" class="form-control" />
 											</div>
 										</fieldset>
+										<fieldset id="channelTypeField">
+											<label class="col-sm-4 control-label no-padding-right"><label class="red">*</label>通路類型：</label>
+											<div class="col-sm-8">
+												<select id="channelTypeSelect" class="form-control" >
+													<option value="" checked>請選擇</option>
+													<option value="bank" checked>銀行通路</option>
+													<option value="normal" checked>一般通路</option>
+												</select>
+											</div>
+										</fieldset>
 										<fieldset>
 											<label class="col-sm-4 control-label no-padding-right">附註說明：</label>
 											<div class="col-sm-8">
@@ -229,6 +249,20 @@
 			$('#nodeForm #branchId').val(nodeData.target.branchId);
 			$('#nodeForm #description').val(nodeData.target.description);
 			$('#nodeForm #notify').val(nodeData.target.notify);
+			if (nodeData.target.par == 'Root') {
+				$("#nodeForm #channelTypeField").show();
+				if (nodeData.target.channelType) {
+					$("#nodeForm #channelTypeSelect option[value='" + nodeData.target.channelType + "']").prop("selected", "true")
+				}
+			} else {
+				$("#nodeForm #channelTypeField").hide();
+			}
+			if (nodeData.target.par == '') {
+				$("#addForm #channelTypeField").show();
+			} else {
+				$("#addForm #channelTypeField").hide()
+			}
+
 			$('#nodeDiv').show();
 		};
 		// 節點反選function
@@ -287,18 +321,18 @@
 								depId : $('#addForm #depId').val(),
 								depName : $('#addForm #depName').val(),
 								branchId: $('#addForm #branchId').val(),
-								description : $('#addForm #description').val()
+								description : $('#addForm #description').val(),
+								channelType:  $('#addForm #channelTypeSelect').val(),
 							};
 							eserviceForm.post(/*[[@{/jdDeptMgnt/insertDepartment}]]*/, formData, function(response) {
 								alertMsg(response.resultMsg);
 								initFunction();
 								treeUtil.show();
 								$('#nodeDiv').show();
+								$(this).dialog('close');
 							});
-							
-							$(this).dialog('close');
 							$('#addForm')[0].reset();
-						} 
+						}
 					}
 				],
 				width: 600
@@ -335,6 +369,10 @@
 				alertMsg('請輸入部門名稱');
 				return false;
 			}
+			if ($("#nodeForm #channelTypeSelect option:selected").val() == '' && $('#nodeForm #parentDep').val() == '0') {
+				alertMsg('請選擇通路類型');
+				return false;
+			}
 			confirmMsg('是否確認修改', function(r) {
 				if (r) {
 					var formData = {
@@ -342,7 +380,8 @@
 						parentDep : $('#nodeForm #parentDep').val(),
 						depName : $('#nodeForm #depName').val(),
 						branchId: $('#nodeForm #branchId').val(),
-						description : $('#nodeForm #description').val()
+						description : $('#nodeForm #description').val(),
+						channelType: $("#nodeForm #channelTypeSelect option:selected").val()
 					};
 					eserviceForm.post(/*[[@{/jdDeptMgnt/updateDepartment}]]*/, formData, function(response) {
 						alertMsg(response.resultMsg);

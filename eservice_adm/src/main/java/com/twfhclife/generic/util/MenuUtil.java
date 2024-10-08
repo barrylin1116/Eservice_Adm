@@ -161,7 +161,8 @@ public class MenuUtil {
 				dataMap.put("text", func.getDepName());
 				dataMap.put("branchId",func.getBranchId());
 				dataMap.put("description", func.getDescription());
-				
+				dataMap.put("channelType", func.getChannelType());
+
 				setDeptSubAceTreeMap(dataList, dataMap);
 				if (dataMap.get("additionalParameters") != null) {
 					dataMap.put("notify", "Y");

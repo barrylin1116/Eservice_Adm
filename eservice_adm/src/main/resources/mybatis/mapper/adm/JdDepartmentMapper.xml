@@ -10,6 +10,7 @@
         <result column="CREATE_DATE" property="createDate" />
         <result column="MODIFY_USER" property="modifyUser" />
         <result column="MODIFY_DATE" property="modifyDate" />
+        <result column="CHANNEL_TYPE" property="channelType" />
     </resultMap>
 
     <parameterMap id="DepartmentVo" type="com.twfhclife.adm.model.DepartmentVo"/>
@@ -67,6 +68,7 @@
         ,d.DESCRIPTION
         ,d.PARENT_DEP
         ,BRANCH_ID
+        ,CHANNEL_TYPE
         FROM
         ESERVICE_JD.DBO.DEPARTMENT d
         ORDER BY
@@ -111,6 +113,7 @@
         ,MODIFY_USER
         ,MODIFY_DATE
         ,BRANCH_ID
+        ,CHANNEL_TYPE
         )
         VALUES
         (
@@ -123,6 +126,7 @@
         ,#{departmentVo.modifyUser,jdbcType=VARCHAR}
         ,getdate()
         ,#{departmentVo.branchId,jdbcType=VARCHAR}
+        ,#{departmentVo.channelType,jdbcType=VARCHAR}
         )
     </insert>
 
@@ -137,6 +141,7 @@
         ,MODIFY_USER = #{departmentVo.modifyUser,jdbcType=VARCHAR}
         ,MODIFY_DATE = getdate()
         ,BRANCH_ID =  #{departmentVo.branchId,jdbcType=VARCHAR}
+        ,CHANNEL_TYPE =  #{departmentVo.channelType,jdbcType=VARCHAR}
         WHERE
         DEP_ID = #{departmentVo.depId,jdbcType=VARCHAR}
     </update>
