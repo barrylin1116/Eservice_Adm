@@ -203,6 +203,7 @@ public class JdUserBatchServiceImpl implements IJdUserBatchService {
                 //todo 數據處理
                 List<JdUserVo> failLinkList = new ArrayList<>();
                 RoleVo roleId = new RoleVo();
+                List<RoleVo> roleIdList = new ArrayList<>();
                 DepartmentVo depId = new DepartmentVo();
                 DepartmentVo branchId = new DepartmentVo();
                 for (JdUserVo vo : userList) {
@@ -254,10 +255,15 @@ public class JdUserBatchServiceImpl implements IJdUserBatchService {
                                         vo.setFailResult("系統平臺角色欄位為必輸欄位，請檢查!");
                                     }else {
                                         // 系統平臺角色代碼是否存在
-                                        roleId = jdRoleService.getRoleId(vo.getRoleId(),depId.getDepId());
-                                        if (roleId == null) {
+                                        List<String> roleIds = Arrays.asList(StringUtils.split(vo.getRoleId(),"##"));
+                                        roleIdList = jdRoleService.getRoleIdList(roleIds, depId.getDepId());
+                                        if (roleIds.size() != roleIdList.size()) {
                                             vo.setFailResult("系統平臺角色代碼不存在，請檢查!");
                                         }
+//                                        roleId = jdRoleService.getRoleId(vo.getRoleId(),depId.getDepId());
+//                                        if (roleId == null) {
+//                                            vo.setFailResult("系統平臺角色代碼不存在，請檢查!");
+//                                        }
                                     }
                                     if (StringUtils.isEmpty(vo.getInitPassword())){
                                         vo.setFailResult("初始密碼為必輸欄位，請檢查");
@@ -317,7 +323,11 @@ public class JdUserBatchServiceImpl implements IJdUserBatchService {
                                         jdUserBatchDao.addUsers(vo);
                                         UserEntityVo user = jdUserMgntService.getUser(vo.getRocId(), "elife_jdzq");
                                         //新增user_role表数据
-                                        jdRoleService.insertUserRole(user.getId(),roleId.getRoleId());
+                                        for (RoleVo roleData : roleIdList) {
+                                            // 调用 insertUserRole 方法插入数据
+                                            jdRoleService.insertUserRole(user.getId(), roleData.getRoleId());
+                                        }
+//                                        jdRoleService.insertUserRole(user.getId(),roleId.getRoleId());
                                         //新增user_dep表数据
                                         if (branchId == null){
                                             jdDeptMgntService.insertUserDep(user.getId(), depId.getDepId(),"","");
@@ -402,11 +412,10 @@ public class JdUserBatchServiceImpl implements IJdUserBatchService {
                                                                         }
                                                                     }
                                                                     // 系統平臺角色代碼是否存在
-                                                                    if (StringUtils.isNotBlank(vo.getRoleId())){
-                                                                        updateRoleId = jdRoleService.getRoleId(vo.getRoleId(),updateDepId.getDepId());
-                                                                        if (updateRoleId == null) {
-                                                                            vo.setFailResult("系統平台角色代碼不存在，請檢查!");
-                                                                        }
+                                                                    List<String> roleIds = Arrays.asList(StringUtils.split(vo.getRoleId(),"##"));
+                                                                    roleIdList = jdRoleService.getRoleIdList(roleIds, updateDepId.getDepId());
+                                                                    if (roleIds.size() != roleIdList.size()) {
+                                                                        vo.setFailResult("系統平臺角色代碼不存在，請檢查!");
                                                                     }
                                                                 }
                                                             }else {
@@ -427,11 +436,10 @@ public class JdUserBatchServiceImpl implements IJdUserBatchService {
                                                                         }
                                                                     }
                                                                     // 系統平臺角色代碼是否存在
-                                                                    if (StringUtils.isNotBlank(vo.getRoleId())){
-                                                                        updateRoleId = jdRoleService.getRoleId(vo.getRoleId(),updateDepId.getDepId());
-                                                                        if (updateRoleId == null) {
-                                                                            vo.setFailResult("系統平台角色代碼不存在，請檢查!");
-                                                                        }
+                                                                    List<String> roleIds = Arrays.asList(StringUtils.split(vo.getRoleId(),"##"));
+                                                                    roleIdList = jdRoleService.getRoleIdList(roleIds, updateDepId.getDepId());
+                                                                    if (roleIds.size() != roleIdList.size()) {
+                                                                        vo.setFailResult("系統平臺角色代碼不存在，請檢查!");
                                                                     }
                                                                 }
                                                             }
@@ -440,8 +448,12 @@ public class JdUserBatchServiceImpl implements IJdUserBatchService {
                                                                 UserEntityVo user = jdUserMgntService.getUser(vo.getUserId(), "elife_jdzq");
                                                                 jdUserBatchDao.updateUsers(vo);
                                                                 //更新user_role表数据
-                                                                if (updateRoleId != null && StringUtils.isNotBlank(updateRoleId.getRoleId())){
-                                                                    jdRoleService.updateUserRole(user.getId(),updateRoleId.getRoleId());
+//                                                                if (updateRoleId != null && StringUtils.isNotBlank(updateRoleId.getRoleId())){
+//                                                                    jdRoleService.updateUserRole(user.getId(),updateRoleId.getRoleId());
+//                                                                }
+                                                                if(!roleIdList.isEmpty()) {
+                                                                    jdRoleService.deleteByUserId(user.getId());
+                                                                    jdRoleService.insertUserRoles(roleIdList, user.getId());
                                                                 }
                                                                 //更新user_dep表数据
                                                                 if (updateBranchId != null && StringUtils.isNotBlank(updateBranchId.getDepId())){

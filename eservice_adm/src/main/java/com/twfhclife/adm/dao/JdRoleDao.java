@@ -91,11 +91,17 @@ public interface JdRoleDao {
 
     RoleVo getRoleId(@Param("roleId") String roleId,@Param("depId")String depId);
 
+    List<RoleVo> getRoleIdList(@Param("roleIds") List<String> roleIds,@Param("depId")String depId);
+
     List<RoleVo> getDepRole(@Param("keyCloakUserId") String keyCloakUserId, @Param("adminUserFlag") String adminUserFlag,@Param("depId")String depId);
 
     List<RoleVo> getOptionDepRole(@Param("keyCloakUserId") String keyCloakUserId, @Param("adminUserFlag") String adminUserFlag,@Param("depId")String depId);
 
     int insertUserRole(@Param("userId")String userId,@Param("roleId")String roleId);
+
+    void insertUserRoles(@Param("roleIdList") List<RoleVo> roleIdList, @Param("userId") String userId);
+
+    void deleteByUserId(@Param("userId") String userId);
 
     int updateUserRole(@Param("userId")String userId,@Param("roleId")String roleId);
 

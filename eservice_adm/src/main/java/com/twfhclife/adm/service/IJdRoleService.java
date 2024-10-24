@@ -79,10 +79,16 @@ public interface IJdRoleService {
 
     RoleVo getRoleId(String roleId,String depId);
 
+    List<RoleVo> getRoleIdList(List<String> roleId,String depId);
+
     List<RoleVo> getDepRole(String userName, String keyCloakUserId,String depId);
 
     @RequestLog
     List<RoleVo> getOptionDepRole(String userName, String keyCloakUserId, String depId);
+
+    void deleteByUserId( String userId);
+
+    void insertUserRoles(List<RoleVo> roleIdList, String userId);
 
     int insertUserRole(String userId, String roleId);
 

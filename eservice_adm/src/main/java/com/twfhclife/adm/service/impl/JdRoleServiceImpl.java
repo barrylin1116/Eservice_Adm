@@ -144,6 +144,10 @@ public class JdRoleServiceImpl implements IJdRoleService {
         return roleDao.getRoleId(roleId,depId);
     }
 
+    public List<RoleVo> getRoleIdList(List<String> roleId,String depId){
+        return roleDao.getRoleIdList(roleId,depId);
+    }
+
     @Override
     public List<RoleVo> getDepRole(String userName, String keyCloakUserId,String depId) {
         // 判斷目前登入者是否有最高權限管理員
@@ -162,6 +166,15 @@ public class JdRoleServiceImpl implements IJdRoleService {
     @Override
     public int insertUserRole(String userId, String roleId) {
         return roleDao.insertUserRole(userId,roleId);
+    }
+
+    @Override
+    public void deleteByUserId( String userId) {
+        roleDao.deleteByUserId(userId);
+    }
+
+    public void insertUserRoles(List<RoleVo> roleIdList, String userId) {
+        roleDao.insertUserRoles(roleIdList ,userId);
     }
 
     @Override

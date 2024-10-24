@@ -233,6 +233,21 @@
                 group by r.ROLE_ID
     </select>
 
+    <!-- 查询多个 roleId -->
+    <select id="getRoleIdList" parameterType="map" resultType="com.twfhclife.adm.model.RoleVo">
+        SELECT r.ROLE_ID
+        from ESERVICE_ADM.DBO.ROLE r
+        left  join ESERVICE_JD.dbo.ROLE_DEPARTMENT rd on r.ROLE_ID = rd.ROLE_ID
+        WHERE r.DIV_ROLE_ID IN
+        <foreach item="roleId" index="index" collection="roleIds" open="(" separator="," close=")">
+            #{roleId}
+        </foreach>
+        <if test="depId != null and depId != ''">
+            and rd.DEP_ID = #{depId}
+        </if>
+        group by r.ROLE_ID
+    </select>
+
     <select id="getOptionDepRole" resultMap="RoleMap">
         SELECT * FROM ESERVICE_ADM.dbo.ROLE a
             left join ESERVICE_JD.dbo.ROLE_DEPARTMENT b on a.ROLE_ID = b.ROLE_ID COLLATE database_default
@@ -265,6 +280,19 @@
     <update id="updateUserRole">
         update ESERVICE_ADM.dbo.USER_ROLE set ROLE_ID = #{roleId} where  USER_ID = #{userId}
     </update>
+
+    <delete id="deleteByUserId" parameterType="String">
+        DELETE FROM USER_ROLE
+        WHERE USER_ID = #{userId}
+    </delete>
+
+    <insert id="insertUserRoles" parameterType="map">
+        INSERT INTO ESERVICE_ADM.dbo.USER_ROLE (USER_ID, ROLE_ID)
+        VALUES
+        <foreach item="role" index="index" collection="roleIdList" separator=",">
+            (#{userId, jdbcType=VARCHAR}, #{role.roleId, jdbcType=VARCHAR})
+        </foreach>
+    </insert>
 
     <select id="countRoleDep" resultType="int">
         select count(1) from ESERVICE_ADM.dbo.ROLE r left join ESERVICE_JD.dbo.ROLE_DEPARTMENT dr on r.ROLE_ID = dr.ROLE_ID
