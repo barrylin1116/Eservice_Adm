@@ -389,8 +389,8 @@
 										<div class="form-group">
 											<label class="col-xs-3">是否傳送其他保險公司：</label>
 											<div class="col-xs-9"><span>
-												<th:block th:if="${detailData['SEND_ALLIANCE'] eq 'Y'}">同意</th:block>
-                                				<th:block th:if="${detailData['SEND_ALLIANCE'] eq 'N'}">不同意</th:block>
+												<th:block th:if="${detailData['TO_COMPANY_ID'] != null && detailData['TO_COMPANY_ID'] != ''}">同意</th:block>
+												<th:block th:unless="${detailData['TO_COMPANY_ID'] != null &&  detailData['TO_COMPANY_ID'] != '' }">不同意</th:block>
 											</span></div>
 										</div>
 										<div class="form-group">
