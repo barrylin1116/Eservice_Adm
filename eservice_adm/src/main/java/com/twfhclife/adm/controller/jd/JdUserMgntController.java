@@ -226,7 +226,7 @@ public class JdUserMgntController extends BaseController {
     @PostMapping("/jdUserMgnt/insertUserRole")
     public ResponseEntity<ResponseObj> insertUserRole(@RequestBody UserRoleVo userRoleVo) {
         try {
-            if (userRoleService.countUserRole(userRoleVo.getUserId()) >= 1) {
+            if (userRoleService.countUserRole(userRoleVo.getUserId()) >= 100) {
                 processError("每個人只允許一個角色");
             } else {
                 int result = userRoleService.insertUserRole(userRoleVo);
@@ -290,15 +290,37 @@ public class JdUserMgntController extends BaseController {
     }
 
     @RequestLog
-    @PostMapping("/jdUserMgnt/getJdUserIcQuery")
+    @PostMapping("/jdUserMgnt/getJdMobileInsuranceQuery")
+    public ResponseEntity<PageResponseObj> getJdMobileInsuranceQuery(@RequestBody JdUserVo vo) {
+        PageResponseObj pageResp = new PageResponseObj();
+        try {
+            // Note: UserRoleVo 需要繼承Pagination，接收 jqGrid 的page 跟 rows 屬性
+            // 設定jqGrid 資料查詢集合
+            pageResp.setRows(userMgntService.getJdMobileInsuranceQuery(vo));
+            // 設定jqGrid 資料查詢總筆數
+            pageResp.setRecords(userMgntService.countJdUser(vo));
+            // 設定jqGrid 目前頁數
+            pageResp.setPage(vo.getPage());
+            // 設定jqGrid 總頁數
+            pageResp.setTotal((pageResp.getRecords() + vo.getRows() - 1) / vo.getRows());
+            pageResp.setResult(PageResponseObj.SUCCESS);
+        } catch (Exception e) {
+            pageResp.setResult(PageResponseObj.ERROR);
+            logger.error("Unable to getJdUserQuery: {}", ExceptionUtils.getStackTrace(e));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(pageResp);
+    }
+
+    @RequestLog
+    @PostMapping("/jdUserMgnt/getJdUserInsuranceQuery")
     public ResponseEntity<PageResponseObj> getJdUserIcQuery(@RequestBody JdUserVo vo) {
         PageResponseObj pageResp = new PageResponseObj();
         try {
             // Note: UserRoleVo 需要繼承Pagination，接收 jqGrid 的page 跟 rows 屬性
             // 設定jqGrid 資料查詢集合
-            pageResp.setRows(userMgntService.getJdUserIcQuery(vo));
+            pageResp.setRows(userMgntService.getJdMobileInsuranceQuery(vo));
             // 設定jqGrid 資料查詢總筆數
-            pageResp.setRecords(userMgntService.countJdUserIc(vo));
+            pageResp.setRecords(userMgntService.countJdMobile(vo));
             // 設定jqGrid 目前頁數
             pageResp.setPage(vo.getPage());
             // 設定jqGrid 總頁數

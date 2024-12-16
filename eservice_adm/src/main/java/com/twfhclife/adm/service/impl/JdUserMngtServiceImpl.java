@@ -97,6 +97,17 @@ public class JdUserMngtServiceImpl implements IJdUserMgntService {
 	}
 
 	@Override
+	public List<Map<String, Object>> getJdMobileInsuranceQuery(JdUserVo vo) {
+		return jdUserBatchDao.getJdMobileInsuranceQuery(vo);
+	}
+
+	@Override
+	public int countJdMobile(JdUserVo vo) {
+		return jdUserBatchDao.countJdMobile(vo);
+	}
+
+
+	@Override
 	public List<Map<String, Object>> getJdUserIcQuery(JdUserVo vo) {
 		return jdUserBatchDao.getJdUserIcQuery(vo);
 	}

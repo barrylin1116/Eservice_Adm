@@ -16,6 +16,7 @@ public class DepartmentVo extends Pagination {
 	private String modifyUser;
 	private Date modifyDate;
 	private String branchId;
+	private String stampFileBase64;
 	public void setBranchId(String branchId) {
 		this.branchId = branchId;
 	}
@@ -24,8 +25,6 @@ public class DepartmentVo extends Pagination {
 		return branchId;
 	}
 
-
-	
 	public String getDepId() {
 		return depId;
 	}
@@ -73,6 +72,14 @@ public class DepartmentVo extends Pagination {
 	}
 	public void setModifyDate(Date modifyDate) {
 		this.modifyDate = modifyDate;
+	}
+
+	// Getter 和 Setter for stampFileBase64
+	public String getStampFileBase64() {
+		return stampFileBase64;
+	}
+	public void setStampFileBase64(String stampFileBase64) {
+		this.stampFileBase64 = stampFileBase64;
 	}
 	
 	@Override

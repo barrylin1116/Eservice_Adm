@@ -10,12 +10,13 @@
         <result column="CREATE_DATE" property="createDate" />
         <result column="MODIFY_USER" property="modifyUser" />
         <result column="MODIFY_DATE" property="modifyDate" />
+        <result column="STAMP_FILE_BASE64" property="stampFileBase64" />
     </resultMap>
 
     <parameterMap id="DepartmentVo" type="com.twfhclife.adm.model.DepartmentVo"/>
 
     <sql id="Base_Column_List">
-        DEP_ID,DEP_NAME,DESCRIPTION,PARENT_DEP,CREATE_USER,CREATE_DATE,MODIFY_USER,MODIFY_DATE
+        DEP_ID,DEP_NAME,DESCRIPTION,PARENT_DEP,CREATE_USER,CREATE_DATE,MODIFY_USER,MODIFY_DATE,STAMP_FILE_BASE64
     </sql>
 
     <!-- 取得所有部門 -->
@@ -27,6 +28,7 @@
         ,DESCRIPTION
         ,PARENT_DEP
         ,BRANCH_ID
+        ,STAMP_FILE_BASE64
         FROM
         ESERVICE_JD.DBO.DEPARTMENT
         )
@@ -67,6 +69,7 @@
         ,d.DESCRIPTION
         ,d.PARENT_DEP
         ,BRANCH_ID
+        ,d.STAMP_FILE_BASE64
         FROM
         ESERVICE_JD.DBO.DEPARTMENT d
         ORDER BY
@@ -81,6 +84,7 @@
         ,DESCRIPTION
         ,PARENT_DEP
         ,BRANCH_ID
+        ,STAMP_FILE_BASE64
         FROM
         ESERVICE_JD.DBO.DEPARTMENT
         WHERE
@@ -111,6 +115,7 @@
         ,MODIFY_USER
         ,MODIFY_DATE
         ,BRANCH_ID
+        ,STAMP_FILE_BASE64
         )
         VALUES
         (
@@ -123,6 +128,7 @@
         ,#{departmentVo.modifyUser,jdbcType=VARCHAR}
         ,getdate()
         ,#{departmentVo.branchId,jdbcType=VARCHAR}
+        ,#{departmentVo.stampFileBase64,jdbcType=VARCHAR}
         )
     </insert>
 
@@ -133,14 +139,15 @@
         SET
         DEP_NAME = #{departmentVo.depName,jdbcType=VARCHAR}
         ,DESCRIPTION = #{departmentVo.description,jdbcType=VARCHAR}
-        ,PARENT_DEP = #{departmentVo.parentDep,jdbcType=VARCHAR}
+
+       ,PARENT_DEP = #{departmentVo.parentDep,jdbcType=VARCHAR}
         ,MODIFY_USER = #{departmentVo.modifyUser,jdbcType=VARCHAR}
         ,MODIFY_DATE = getdate()
         ,BRANCH_ID =  #{departmentVo.branchId,jdbcType=VARCHAR}
+        ,STAMP_FILE_BASE64 =  #{departmentVo.stampFileBase64,jdbcType=VARCHAR}
         WHERE
         DEP_ID = #{departmentVo.depId,jdbcType=VARCHAR}
     </update>
-
     <!-- 刪除部門節點 -->
     <delete id="deleteDepartment">
         DELETE FROM ESERVICE_JD.DBO.DEPARTMENT WHERE DEP_ID = #{depId}
@@ -153,6 +160,7 @@
         ,DESCRIPTION
         ,PARENT_DEP
         ,BRANCH_ID
+        ,STAMP_FILE_BASE64
         FROM
         ESERVICE_JD.DBO.DEPARTMENT
         WHERE
@@ -168,7 +176,7 @@
 
     <select id="getNotifyDepts" resultType="hashmap">
         SELECT
-          d.DEP_ID ,d.DEP_NAME, d1.DEP_NAME PASSAGE_WAY
+          d.DEP_ID ,d.DEP_NAME, d1.DEP_NAME PASSAGE_WAY, d1.STAMP_FILE_BASE64
         FROM
         ESERVICE_JD.DBO.DEPARTMENT d inner join ESERVICE_JD.DBO.DEPARTMENT d1 on d1.DEP_ID = d.PARENT_DEP
         WHERE d.PARENT_DEP = #{passageWay}

@@ -137,7 +137,7 @@ public class MenuUtil {
 				rootMap.put("branchId",func.getBranchId());
 				rootMap.put("type", "folder");
 				rootMap.put("notify", "R");
-
+				rootMap.put("stampFileBase64",func.getStampFileBase64());
 				LinkedHashMap<String, Object> architectureMap = new LinkedHashMap<String, Object>();
 				architectureMap.put("architecture", rootMap);
 				aceTreeList.add(architectureMap);
@@ -161,7 +161,7 @@ public class MenuUtil {
 				dataMap.put("text", func.getDepName());
 				dataMap.put("branchId",func.getBranchId());
 				dataMap.put("description", func.getDescription());
-				
+				dataMap.put("stampFileBase64",func.getStampFileBase64());
 				setDeptSubAceTreeMap(dataList, dataMap);
 				if (dataMap.get("additionalParameters") != null) {
 					dataMap.put("notify", "Y");
