@@ -44,7 +44,11 @@ public interface IJdUserMgntService {
 
 	List<Map<String, Object>> getJdUserQuery(JdUserVo vo);
 
+	List<Map<String, Object>> getJdMobileInsuranceQuery(JdUserVo vo);
+
 	int countJdUser(JdUserVo vo);
+
+	int countJdMobile(JdUserVo vo);
 
 	List<Map<String, Object>> getJdUserIcQuery(JdUserVo vo);
 

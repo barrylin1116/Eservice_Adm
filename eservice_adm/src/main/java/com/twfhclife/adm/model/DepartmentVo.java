@@ -16,7 +16,7 @@ public class DepartmentVo extends Pagination {
 	private String modifyUser;
 	private Date modifyDate;
 	private String branchId;
-	private String channelType;
+	private String stampFileBase64;
 	public void setBranchId(String branchId) {
 		this.branchId = branchId;
 	}
@@ -74,14 +74,14 @@ public class DepartmentVo extends Pagination {
 		this.modifyDate = modifyDate;
 	}
 
-	public String getChannelType() {
-		return channelType;
+	// Getter 和 Setter for stampFileBase64
+	public String getStampFileBase64() {
+		return stampFileBase64;
 	}
-
-	public void setChannelType(String channelType) {
-		this.channelType = channelType;
+	public void setStampFileBase64(String stampFileBase64) {
+		this.stampFileBase64 = stampFileBase64;
 	}
-
+	
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);

@@ -246,6 +246,16 @@
 									<table id="jdUserIcGrid"></table>
 									<div id="jdUserIcPager"></div>
 								</div>
+
+							</div>
+							<div id="editJdMobile" class="hide">
+								<div class="widget-main no-padding">
+								</div>
+								<div style="width: 750px">
+									<table id="jdMobileInsuranceQuery"></table>
+									<div id="jdMobileInsuranceQueryPager"></div>
+								</div>
+
 							</div>
 						</div>
 					</div>
@@ -259,7 +269,7 @@
 		<th:block th:replace="fragments/script"/>
 		<script th:inline="javascript">
 		/*<![CDATA[*/
-		var qryGrid, deptGrid, roleGrid, deputyGrid,jdUserGrid,jdUserIcGrid;
+		var qryGrid, deptGrid, roleGrid, deputyGrid,jdUserGrid,jdUserIcGrid,jdMobileInsuranceQuery;
 		var selectUserId;
 		$(function() {
 
@@ -532,7 +542,11 @@
 					// actionHtml += '<a href="javascript:openDeputyDialog(\'' + row.ID + '\', \'' + row.USERNAME + '\', \'' + (emptyIfNull(row.LAST_NAME) + emptyIfNull(row.FIRST_NAME)) +'\');" class="green bigger-140 show-details-btn" title="設定代理人">';
 					// actionHtml += '<i class="my-icon fa fa-user bigger-120"></i><span class="sr-only">設定代理人</span>';
 					// actionHtml += '</a>';
-					//
+						actionHtml += '&nbsp;&nbsp;';
+						actionHtml += '<a href="javascript:openJdMobile(\'' + row.USERNAME + '\');" class="green bigger-140 show-details-btn" title="行投個人案件列表">';
+						actionHtml += '<i class="my-icon fa fa-user bigger-120"></i><span class="sr-only">行投個人案件列表</span>';
+						actionHtml += '</a>';
+								//
 					return actionHtml;
 				}} 
 			];
@@ -660,6 +674,7 @@
 			];
 		}
 
+
 		function openJdUser(userId) {
 			jdUserGrid.setPostData('userId', userId);
 			jdUserGrid.create();
@@ -691,7 +706,7 @@
 				modal: true,
 				title: "<div class='widget-header widget-header-small'><h4 class='smaller'>行投個人案件列表</h4></div>",
 				title_html: true,
-				width: 1000,
+				width: 800,
 				height: 530
 			});
 		}

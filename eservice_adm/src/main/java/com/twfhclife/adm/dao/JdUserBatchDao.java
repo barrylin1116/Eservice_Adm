@@ -24,6 +24,10 @@ public interface JdUserBatchDao {
 
     int countJdUser(@Param("vo") JdUserVo vo);
 
+    List<Map<String, Object>> getJdMobileInsuranceQuery(@Param("vo") JdUserVo vo);
+
+    int countJdMobile(@Param("vo") JdUserVo vo);
+
     List<Map<String, Object>> getJdUserIcQuery(@Param("vo") JdUserVo vo);
 
     int countJdUserIc(@Param("vo") JdUserVo vo);

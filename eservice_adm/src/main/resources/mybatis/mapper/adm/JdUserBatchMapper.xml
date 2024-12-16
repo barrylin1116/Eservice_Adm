@@ -97,11 +97,34 @@
           AND B.ROW_NUM <![CDATA[>]]> (#{vo.page} - 1) * #{vo.rows}
     </select>
 
+    <select id="getJdMobileInsuranceQuery" resultType="hashmap">
+        SELECT
+            *
+        FROM (
+                 SELECT
+                     ROW_NUMBER() OVER (ORDER BY RecruitId) AS ROW_NUM
+        ,A.*
+                 FROM (
+                          select * from OIS_DB.dbo.ActionPolicyView where RecruitId  = #{vo.userId}                      ) A
+             ) B
+        WHERE
+            B.ROW_NUM <![CDATA[<=]]> #{vo.page} * #{vo.rows}
+          AND B.ROW_NUM <![CDATA[>]]> (#{vo.page} - 1) * #{vo.rows}
+    </select>
+
     <select id="countJdUser" resultType="int">
         SELECT
             COUNT(1) AS AMOUNT
         FROM (
                  select * from ESERVICE_JD.dbo.USERS where USER_ID  = #{vo.userId}
+             ) t
+    </select>
+
+    <select id="countJdMobile" resultType="int">
+        SELECT
+            COUNT(1) AS AMOUNT
+        FROM (
+                 select * from OIS_DB.dbo.ActionPolicyView where RecruitId  = #{vo.userId}
              ) t
     </select>
 
