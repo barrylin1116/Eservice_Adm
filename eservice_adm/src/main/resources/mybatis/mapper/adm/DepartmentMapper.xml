@@ -128,6 +128,7 @@
 			,PARENT_DEP = #{departmentVo.parentDep,jdbcType=VARCHAR}
 			,MODIFY_USER = #{departmentVo.modifyUser,jdbcType=VARCHAR}
 			,MODIFY_DATE = getdate()
+		    ,STAMP_FILE_BASE64 = #{departmentVo.stampFileBase64,jdbcType=VARCHAR}
 		WHERE
 			DEP_ID = #{departmentVo.depId,jdbcType=VARCHAR}
 	</update>

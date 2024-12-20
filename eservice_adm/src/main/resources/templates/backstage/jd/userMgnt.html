@@ -639,6 +639,25 @@
 				{name: 'EMAIL', index: 'EMAIL'},
 				{name: 'MOBILE', index: 'MOBILE'}
 			];
+
+			jdMobileInsuranceQuery = new jqGridUtil();
+			jdMobileInsuranceQuery.id = '#jdMobileInsuranceQuery';
+			jdMobileInsuranceQuery.pager = '#jdMobileInsuranceQueryPager';
+			jdMobileInsuranceQuery.rowNum = 10;
+			jdMobileInsuranceQuery.height = 200;
+			jdMobileInsuranceQuery.width = 1000;
+			jdMobileInsuranceQuery.rownumWidth = 300;
+			jdMobileInsuranceQuery.url = /*[[@{/jdUserMgnt/getJdUserInsuranceQuery}]]*/;
+			jdMobileInsuranceQuery.caption = '行投詳細資料'
+			jdMobileInsuranceQuery.colNames = ['行動投保編號', '保單號碼','商品名稱','被保險人資料','要保人資料','案件狀態'];
+			jdMobileInsuranceQuery.colModel = [
+				{name: 'ActionNo', index: 'ActionNo'},
+				{name: 'PolicyNo', index: 'PolicyNo'},
+				{name: 'ProductName', index: 'ProductName'},
+				{name: 'InsuredIdentity', index: 'InsuredIdentity'},
+				{name: 'ApplicantIdentity', index: 'ApplicantIdentity'},
+				{name: 'Status', index: 'Status'}
+			];
 		}
 
 		function openJdUser(userId) {
@@ -661,6 +680,18 @@
 				title: "<div class='widget-header widget-header-small'><h4 class='smaller'>IC人員負責分行</h4></div>",
 				title_html: true,
 				width: 800,
+				height: 530
+			});
+		}
+
+		function openJdMobile(userId) {
+			jdMobileInsuranceQuery.setPostData('userId', userId);
+			jdMobileInsuranceQuery.create();
+			$('#editJdMobile').removeClass('hide').dialog({
+				modal: true,
+				title: "<div class='widget-header widget-header-small'><h4 class='smaller'>行投個人案件列表</h4></div>",
+				title_html: true,
+				width: 1000,
 				height: 530
 			});
 		}

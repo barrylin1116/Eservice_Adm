@@ -91,6 +91,20 @@
 															<input type="text" id="description" class="form-control" />
 														</div>
 													</fieldset>
+													<!-- 新增上傳通路印章圖的欄位 -->
+													<fieldset>
+														<label class="col-sm-4 control-label no-padding-right"><label class="red">*</label>通路印章圖：</label>
+														<div class="col-sm-8">
+															<input type="file" id="sealImage" class="form-control" name="sealImage" accept="image/*" />
+															<!-- 顯示圖片的區塊 -->
+															<img id="sealImagePreview" style="max-width: 100%; display: none;" />
+															<!-- 隱藏欄位：存儲Base64的圖片碼 -->
+															<input type="hidden" id="stampFileBase64" name="STAMP_FILE_BASE64"/>
+															<!-- 新增刪除圖片的按鈕 -->
+															<button type="button" id="removeImageBtn" class="btn btn-danger" style="display: none;">刪除圖片</button>
+														</div>
+													</fieldset>
+
 													<div class="form-actions center">
 														<button type="button" id="addNodeBtn" class="btn btn-primary">
 															<i class="ace-icon glyphicon glyphicon-plus" aria-hidden="true"></i>
@@ -134,6 +148,19 @@
 															<input type="text" id="description" class="form-control" />
 														</div>
 													</fieldset>
+													<!-- 新增上傳通路印章圖的欄位 -->
+													<fieldset>
+														<label class="col-sm-4 control-label no-padding-right"><label class="red">*</label>通路印章圖：</label>
+														<div class="col-sm-8">
+															<input type="file" id="sealImage" class="form-control" name="sealImage" accept="image/*" />
+															<!-- 顯示圖片的區塊 -->
+															<img id="sealImagePreview" style="max-width: 100%; display: none;" />
+															<!-- 隱藏欄位：存儲Base64的圖片碼 -->
+															<input type="hidden" id="stampFileBase64" name="STAMP_FILE_BASE64"/>
+															<!-- 新增刪除圖片的按鈕 -->
+															<button type="button" id="removeImageBtn" class="btn btn-danger" style="display: none;">刪除圖片</button>
+														</div>
+													</fieldset>
 													<div class="form-actions center">
 														<button id="addRootBtn" type="button" class="btn btn-primary">
 															<i class="ace-icon glyphicon glyphicon-plus" aria-hidden="true"></i>
@@ -171,6 +198,19 @@
 												<input type="text" id="description" class="form-control" />
 											</div>
 										</fieldset>
+										<!-- 新增上傳通路印章圖的欄位 -->
+										<fieldset>
+											<label class="col-sm-4 control-label no-padding-right"><label class="red">*</label>通路印章圖：</label>
+											<div class="col-sm-8">
+												<input type="file" id="sealImage" class="form-control" name="sealImage" accept="image/*" />
+												<!-- 顯示圖片的區塊 -->
+												<img id="sealImagePreview" style="max-width: 100%; display: none;" />
+												<!-- 隱藏欄位：存儲Base64的圖片碼 -->
+												<input type="hidden" id="stampFileBase64" name="STAMP_FILE_BASE64"/>
+												<!-- 新增刪除圖片的按鈕 -->
+												<button type="button" id="removeImageBtn" class="btn btn-danger" style="display: none;">刪除圖片</button>
+											</div>
+										</fieldset>
 									</form>
 								</div>
 							</div>
@@ -185,6 +225,38 @@
 		</div>
 	</body>
 	<th:block th:replace="fragments/script"/>
+	<script th:inline="javascript">
+		$(document).ready(function () {
+			// 當選擇圖片時，觸發預覽功能
+			$("#sealImage").on("change", function () {
+				var file = this.files[0];
+				if (file) {
+					var reader = new FileReader();
+					reader.onload = function (e) {
+						// 顯示圖片預覽
+						$("#sealImagePreview").attr("src", e.target.result).show();
+						// 將圖片轉為 Base64 存入隱藏欄位
+						$("#stampFileBase64").val(e.target.result);
+						// 顯示刪除按鈕
+						$("#removeImageBtn").show();
+					};
+					reader.readAsDataURL(file);
+				}
+			});
+
+			// 當點擊刪除圖片按鈕時，刪除圖片和相關資料
+			$("#removeImageBtn").on("click", function () {
+				// 清除圖片預覽
+				$("#sealImagePreview").attr("src", "").hide();
+				// 清空 file input 的值
+				$("#sealImage").val("");
+				// 清空 Base64 的隱藏欄位
+				$("#stampFileBase64").val("");
+				// 隱藏刪除按鈕
+				$("#removeImageBtn").hide();
+			});
+		});
+	</script>
 	<script th:src="@{/js/adm/tree.js}"></script>
 	<script th:inline="javascript">
 	/*<![CDATA[*/
@@ -270,7 +342,8 @@
 								parentDep : $('#nodeDiv #depId').val(),
 								depId : $('#addForm #depId').val(),
 								depName : $('#addForm #depName').val(),
-								description : $('#addForm #description').val()
+								description : $('#addForm #description').val(),
+								stampFileBase64: $('#stampFileBase64').val()  // 圖片的 Base64 資料
 							};
 							eserviceForm.post(/*[[@{/deptMgnt/insertDepartment}]]*/, formData, function(response) {
 								alertMsg(response.resultMsg);
@@ -324,7 +397,8 @@
 						depId :$('#nodeForm #depId').val(),
 						parentDep : $('#nodeForm #parentDep').val(),
 						depName : $('#nodeForm #depName').val(),
-						description : $('#nodeForm #description').val()
+						description : $('#nodeForm #description').val(),
+						stampFileBase64: $('#stampFileBase64').val()  // 圖片的 Base64 資料
 					};
 					eserviceForm.post(/*[[@{/deptMgnt/updateDepartment}]]*/, formData, function(response) {
 						alertMsg(response.resultMsg);
