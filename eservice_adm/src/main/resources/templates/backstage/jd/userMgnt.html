@@ -704,6 +704,9 @@
 			jdMobileInsuranceQuery.create();
 			$('#editJdMobile').removeClass('hide').dialog({
 				modal: true,
+				resize: function(event, ui) {
+					$(jdMobileInsuranceQuery.id).setGridWidth(ui.size.width);
+				},
 				title: "<div class='widget-header widget-header-small'><h4 class='smaller'>行投個人案件列表</h4></div>",
 				title_html: true,
 				width: 800,
